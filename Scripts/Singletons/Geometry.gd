@@ -1,6 +1,6 @@
 extends Node
 
-func draw_cube(p1, p2, verts):
+func draw_bounds(p1, p2, verts):
 	var v0 = Cube2Sphere.cube2sphere(p1.x, p1.y, p1.z)
 	var v1 = Cube2Sphere.cube2sphere(p2.x, p1.y, p1.z)
 	var v2 = Cube2Sphere.cube2sphere(p1.x, p1.y, p2.z)

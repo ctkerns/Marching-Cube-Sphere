@@ -19,7 +19,7 @@ func draw():
 	var verts = PoolVector3Array()
 
 	# Draw octree.
-	verts = Geometry.draw_cube(Vector3(-1, -1, 1), Vector3(1, 1, 2), verts)
+	verts = Geometry.draw_bounds(Vector3(-1, -1, 1), Vector3(1, 1, 2), verts)
 
 	# Create surface.
 	arr[Mesh.ARRAY_VERTEX] = verts
