@@ -22,6 +22,7 @@ config/icon="res://icon.png"
 [autoload]
 
 Cube2Sphere="*res://Scripts/Singletons/Cube2Sphere.gd"
+Geometry="*res://Scripts/Singletons/Geometry.gd"
 
 [input]
 
