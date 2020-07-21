@@ -27,7 +27,7 @@ func draw():
 	var verts = PoolVector3Array()
 
 	# Draw octree.
-	verts = _draw_cube(Vector3(0, 0, 0), Vector3(1, 1, 1), verts)
+	verts = _draw_cube(Vector3(-1, -1, 1), Vector3(1, 1, 2), verts)
 
 	# Create surface.
 	arr[Mesh.ARRAY_VERTEX] = verts
@@ -36,16 +36,14 @@ func draw():
 	mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 			
 func _draw_cube(p1, p2, verts):
-	print("drawing a cube")
-	
-	var v0 = p1
-	var v1 = Vector3(p2.x, p1.y, p1.z)
-	var v2 = Vector3(p1.x, p1.y, p2.z)
-	var v3 = Vector3(p2.x, p1.y, p2.z)
-	var v4 = Vector3(p1.x, p2.y, p1.z)
-	var v5 = Vector3(p2.x, p2.y, p1.z)
-	var v6 = Vector3(p1.x, p2.y, p2.z)
-	var v7 = p2
+	var v0 = Cube2Sphere.cube2sphere(p1.x, p1.y, p1.z)
+	var v1 = Cube2Sphere.cube2sphere(p2.x, p1.y, p1.z)
+	var v2 = Cube2Sphere.cube2sphere(p1.x, p1.y, p2.z)
+	var v3 = Cube2Sphere.cube2sphere(p2.x, p1.y, p2.z)
+	var v4 = Cube2Sphere.cube2sphere(p1.x, p2.y, p1.z)
+	var v5 = Cube2Sphere.cube2sphere(p2.x, p2.y, p1.z)
+	var v6 = Cube2Sphere.cube2sphere(p1.x, p2.y, p2.z)
+	var v7 = Cube2Sphere.cube2sphere(p2.x, p2.y, p2.z)
 
 	# Bottom face.
 	verts.append(v0)
