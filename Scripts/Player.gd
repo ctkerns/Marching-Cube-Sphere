@@ -2,14 +2,13 @@ extends Spatial
 
 var _speed = 5
 var _mouse_sensitivity = 0.1
-var rotator
-var camera
+
+onready var rotator = $Rotator
+onready var camera = $Rotator/Camera
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	
-	rotator = get_node("Rotator")
-	camera = get_node("Rotator/Camera")
+	self.set_rotation(Vector3(0.0, 0.0, 0.0))
 	
 func _process(delta):
 	# Free the mouse.
@@ -19,6 +18,7 @@ func _process(delta):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	
+	# Move the Player.
 	if Input.is_action_pressed("move_forward"):
 		translate(Vector3(0, 0, -_speed*delta))
 	if Input.is_action_pressed("move_backward"):
@@ -33,6 +33,7 @@ func _process(delta):
 		translate(Vector3(0, -_speed*delta, 0))
 
 func _input(event):
+	# Rotate the camera.
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		rotator.rotate_object_local(Vector3(1, 0, 0), deg2rad(event.relative.y*_mouse_sensitivity*-1))
 		self.rotate_object_local(Vector3(0, 1, 0), deg2rad(event.relative.x*_mouse_sensitivity*-1))
