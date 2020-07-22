@@ -12,11 +12,11 @@ func _ready():
 	_faces.append(get_node("Face5")) # x -
 	_faces.append(get_node("Face6")) # y -
 
-func init(octree_depth):
+func init():
 	_initialized = true
 	
 	for face in _faces:
-		face.init(octree_depth)
+		face.init()
 
 func _draw():
 	if not _initialized:
