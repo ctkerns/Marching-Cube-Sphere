@@ -23,6 +23,6 @@ func _draw():
 		print("You need to initialize this planet before drawing")
 		return
 	
-	_faces[0].draw()
-	# for face in _faces:
-	# 	face.draw()
+	#_faces[0].draw()
+	for face in _faces:
+		face.draw()
