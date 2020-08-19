@@ -1,52 +1,32 @@
 extends Node
 
-func draw_bounds(p1, p2, verts):
-	var v0 = Cube2Sphere.cube2sphere(p1.x, p1.y, p1.z)
-	var v1 = Cube2Sphere.cube2sphere(p2.x, p1.y, p1.z)
-	var v2 = Cube2Sphere.cube2sphere(p1.x, p1.y, p2.z)
-	var v3 = Cube2Sphere.cube2sphere(p2.x, p1.y, p2.z)
-	var v4 = Cube2Sphere.cube2sphere(p1.x, p2.y, p1.z)
-	var v5 = Cube2Sphere.cube2sphere(p2.x, p2.y, p1.z)
-	var v6 = Cube2Sphere.cube2sphere(p1.x, p2.y, p2.z)
-	var v7 = Cube2Sphere.cube2sphere(p2.x, p2.y, p2.z)
-
-	# Bottom face.
-	verts.append(v0)
-	verts.append(v1)
-
-	verts.append(v0)
-	verts.append(v2)
-
-	verts.append(v1)
-	verts.append(v3)
-
-	verts.append(v2)
-	verts.append(v3)
-
-	# Top face.
-	verts.append(v4)
-	verts.append(v5)
-
-	verts.append(v4)
-	verts.append(v6)
-
-	verts.append(v5)
-	verts.append(v7)
-
-	verts.append(v6)
-	verts.append(v7)
-
-	# Sides.
-	verts.append(v0)
-	verts.append(v4)
-
-	verts.append(v1)
-	verts.append(v5)
-
-	verts.append(v2)
-	verts.append(v6)
-
-	verts.append(v3)
-	verts.append(v7)
+func draw_cuboid_edge(p1, p2, verts):
+	# Arrange corners of the cube.
+	var v = [
+		Vector3(p1.x, p1.y, p1.z),
+		Vector3(p2.x, p1.y, p1.z),
+		Vector3(p1.x, p1.y, p2.z),
+		Vector3(p2.x, p1.y, p2.z),
+		Vector3(p1.x, p2.y, p1.z),
+		Vector3(p2.x, p2.y, p1.z),
+		Vector3(p1.x, p2.y, p2.z),
+		Vector3(p2.x, p2.y, p2.z)
+	]
 	
+	return draw_hexahedron_edge(v, verts)
+
+func draw_hexahedron_edge(v: Array, verts):
+	# Transform corners to sphere surface.
+	for i in range(8):
+		v[i] = Cube2Sphere.cube2sphere(v[i].x, v[i].y, v[i].z)
+
+	# Traverse hexahedron edges with bitstring.
+	var i = 0x2ef0298
+	while i > 0x2ef0:
+		# Draw each edge of the hexahedron.
+		verts.append(v[i&7])
+		verts.append(v[(i >> 14)&7])
+
+		i >>= 1
+
 	return verts

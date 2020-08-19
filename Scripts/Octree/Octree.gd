@@ -9,6 +9,8 @@ onready var head = Octnode.Octnode.new(0.5)
 onready var _tree_verts = PoolVector3Array()
 onready var _dual_verts = PoolVector3Array()
 
+var _arb_factor = 4
+
 enum Division {SW_Down, NW_Down, SW_Up, NW_Up, SE_Down, NE_Down, SE_Up, NE_Up}
 enum Direction {Up, Down, North, South, East, West}
 
@@ -33,6 +35,9 @@ func split(loc_code: int):
 	for i in range(8):
 		nodes[prefix | suffix] = Octnode.Octnode.new(0.5)
 		suffix += 1
+
+func _is_branch(loc_code: int):
+	return nodes.has(_get_child(loc_code, 0))
 	
 # Returns the depth of this node.
 func _get_depth(loc_code: int) -> int:
@@ -44,30 +49,63 @@ func _get_child(loc_code: int, div: int) -> int:
 
 # Returns the position of the center of this node.
 func _get_vertex(loc_code: int) -> Vector3:
-	return Vector3(0, 0, 0)
+	var depth = _get_depth(loc_code)
+	var scale = 2.0 / (pow(2, depth))
 
+	# Start at the center of the head node.
+	var vert = Vector3(0, 0, 2)
+
+	# Traverse the path of the node bottom up.
+	var n = loc_code
+	var increment = scale
+	for i in range(depth):
+		# Move the vertex according to the locational code.
+		if n & 4 == 4:
+			vert.x += increment/2
+		else:
+			vert.x -= increment/2
+
+		if n & 2 == 2:
+			vert.y += increment/2
+		else:
+			vert.y -= increment/2
+
+		if n & 1 == 1:
+			vert.z += increment/2
+		else:
+			vert.z -= increment/2
+
+		# Move up a level.
+		increment *= 2
+		n = n >> 3
+
+	return vert
+		
 # Returns the bounding box of the node. 
 func _get_bounds(loc_code: int):
 	var depth = _get_depth(loc_code)
-	var edge = 2.0 / (pow(2, depth))
+	var scale = 2.0 / (pow(2, depth))
 
+	# Start at the center of the head node.
 	var vert = Vector3(-1, -1, 1)
 
+	# Traverse the path of the node bottom up.
 	var n = loc_code
-	var working_edge = edge
+	var increment = scale
 	for i in range(depth):
+		# Move the vertex according to the locational code.
 		if n & 4 == 4:
-			vert.x += working_edge
+			vert.x += increment
 		if n & 2 == 2:
-			vert.y += working_edge
+			vert.y += increment
 		if n & 1 == 1:
-			vert.z += working_edge
+			vert.z += increment
 
+		# Move up a level.
 		n = n >> 3
+		increment *= 2
 
-		working_edge *= 2
-
-	return [vert, edge]
+	return [vert, scale]
 
 # Returns the adjacent neighboring leaf node in the given direction. Not yet implemented.
 func _get_neighbor(loc_code: int, dir: int) -> int:
@@ -95,9 +133,7 @@ func draw():
 func _draw_tree():
 	# Initialize stack.
 	var stack = []
-	stack.push_back(1)
-	
-	var arb_factor = 4
+	stack.push_back(0b1)
 
 	# Perform a DFS traversal of the octree using stack.
 	var id
@@ -105,21 +141,18 @@ func _draw_tree():
 		# Pop frame from stack.
 		id = stack.pop_back()
 
-		# Get the address of a child of this node.
-		var check = _get_child(id, 0)
-
-		# Check if this node has children.
-		if !nodes.has(check):
+		# Check if this node is a leaf node.
+		if not _is_branch(id):
 			# Draw the leaf node.
 			var bounds = _get_bounds(id)
 			var vert = bounds[0]
-			var edge = bounds[1]
+			var scale = bounds[1]
 
-			var arb_stretch = Vector3(vert.x, vert.y, vert.z*arb_factor)
+			var arb_stretch = Vector3(vert.x, vert.y, vert.z*_arb_factor)
 
-			_tree_verts = Geometry.draw_bounds(
+			_tree_verts = Geometry.draw_cuboid_edge(
 				arb_stretch,
-				arb_stretch + Vector3(edge, edge, edge*arb_factor),
+				arb_stretch + Vector3(scale, scale, scale*_arb_factor),
 				_tree_verts
 			)
 		else:
@@ -128,16 +161,53 @@ func _draw_tree():
 				stack.push_back(_get_child(id, i))
 
 func _draw_dual():
+	_cube_proc(0b1)
+
+func _cube_proc(t: int):
+	# Terminate when t1 is a leaf node.
+	if not _is_branch(t):
+		return
+
+	# Recursively traverse child nodes.
+	var children = []
+	children.resize(8)
+	for i in range(8):
+		children[i] = _get_child(t, i)
+		
+		_cube_proc(children[i])
+
+	_vert_proc(children)
+
+func _face_proc(t1, t2, t3, t4):
 	pass
 
-func _cube_proc(q1):
+func _edge_proc(t1, t2):
 	pass
 
-func _face_proc(q1, q2, q3, q4):
-	pass
+func _vert_proc(t: Array):
+	var num_leaves = 0
 
-func _edge_proc(q1, q2):
-	pass
+	var children = []
+	children.resize(8)
 
-func _vert_proc(q1, q2, q3, q4, q5, q6, q7, q8):
-	pass
+	for i in range(8):
+		if _is_branch(t[i]):
+			# If node is a branch, get its child that is connected to the octree vertex.
+			children[i] = _get_child(t[i], 7 - i)
+		else:
+			# If node is a leaf, use the node as a stand in for its child.
+			children[i] = t[i]
+			num_leaves += 1
+	
+	if num_leaves >= 8:
+		# All nodes surrounding the vertex are leaves so draw the dual volume here.
+		var v = []
+		v.resize(8)
+		for i in range(8):
+			v[i] = _get_vertex(t[i])
+			v[i].z *= _arb_factor
+
+		_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
+	else:
+		# Recursively traverse child nodes.
+		_vert_proc(children)
