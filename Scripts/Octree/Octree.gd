@@ -22,6 +22,8 @@ func init():
 	split(0b1)
 	split(0b1000)
 	split(0b1001)
+	split(0b1010)
+	split(0b1011)
 	#split(0b1000000)
 	pass
 	
@@ -192,24 +194,25 @@ func _cube_proc(t: int):
 	_face_proc([children[6], children[7]], 0b001)
 
 	# Traverse octree edges.
-	_edge_proc([children[0], children[1], children[2], children[3]])
-	_edge_proc([children[0], children[1], children[4], children[5]])
-	_edge_proc([children[0], children[2], children[4], children[6]])
-	_edge_proc([children[1], children[3], children[5], children[7]])
-	_edge_proc([children[2], children[3], children[6], children[7]])
-	_edge_proc([children[4], children[6], children[5], children[7]])
+	_edge_proc([children[0], children[1], children[2], children[3]], 0b100)
+	_edge_proc([children[0], children[1], children[4], children[5]], 0b010)
+	_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
+	_edge_proc([children[1], children[3], children[5], children[7]], 0b001)
+	_edge_proc([children[2], children[3], children[6], children[7]], 0b010)
+	_edge_proc([children[4], children[6], children[5], children[7]], 0b100)
 
 	# Traverse octree vertices.
 	_vert_proc(children)
 
 # Octree face, dual edge, takes two nodes as arguments.
+# Assume that t_0 is inferior on given axis and t_1 is superior.
 func _face_proc(t: Array, axis: int):
 	var num_leaves = 0
 
 	var children = []
 	children.resize(8)
 
-	# Find plane that needs to be connected, with the value at the given axis always 0.
+	# Find interior plane that needs to be connected, with the value at the given axis always 0.
 	var plane
 	match axis:
 		0b001:
@@ -224,6 +227,7 @@ func _face_proc(t: Array, axis: int):
 		for i in range(4):
 			children[i] = _get_child(t[0], plane[i] | axis)
 	else:
+		# If node is a leaf, use the node as a stand in for its child.
 		for i in range(4):
 			children[i] = t[0]
 		num_leaves += 1
@@ -232,6 +236,7 @@ func _face_proc(t: Array, axis: int):
 		for i in range(4):
 			children[i + 4] = _get_child(t[1], plane[i])
 	else:
+		# If node is a leaf, use the node as a stand in for its child.
 		for i in range(4):
 			children[i + 4] = t[1]
 		num_leaves += 1
@@ -243,18 +248,54 @@ func _face_proc(t: Array, axis: int):
 		_face_proc([children[2], children[6]], axis)
 		_face_proc([children[3], children[7]], axis)
 
-		_edge_proc([children[0], children[1], children[4], children[5]])
-		_edge_proc([children[0], children[2], children[4], children[6]])
-		_edge_proc([children[1], children[3], children[5], children[7]])
-		_edge_proc([children[2], children[3], children[6], children[7]])
+		# Traverse octree edges.
+		_edge_proc([children[0], children[1], children[4], children[5]], 0b010)
+		_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
+		_edge_proc([children[1], children[3], children[5], children[7]], 0b001)
+		_edge_proc([children[2], children[3], children[6], children[7]], 0b010)
 
-		_vert_proc(children)
+		# Traverse octree vertices.
+		_vert_proc(children) # Assure that these are in the right order.
 
 # Octree edge, dual face, takes four nodes as arguments.
-func _edge_proc(t: Array):
-	pass
+# Assume a node's location t in bit form is also it's location relative to the other nodes on valid
+# axes.
+func _edge_proc(t: Array, axis: int):
+	var num_leaves = 0
+
+	var children = []
+	children.resize(8)
+
+	# Find exterior plane that needs to be connected, with the value at the given axis always 0.
+	var plane
+	match axis:
+		0b001:
+			plane = [0b000, 0b010, 0b100, 0b110]
+		0b010:
+			plane = [0b000, 0b001, 0b100, 0b101]
+		0b100:
+			plane = [0b000, 0b001, 0b010, 0b011]
+
+	# Find children to be connected.
+	for i in range(4):
+		if _is_branch(t[i]):
+			children[i] = _get_child(t[i], plane[3 - i])
+			children[i + 4] = _get_child(t[i], plane[3 - i] | axis)
+		else:
+			children[i] = t[i]
+			children[i + 4] = t[i]
+			num_leaves += 1
+
+	if num_leaves < 4:
+		# Recursively traverse child nodes.
+		_edge_proc([children[0], children[1], children[2], children[3]], axis)
+		_edge_proc([children[4], children[5], children[6], children[7]], axis)
+
+		# Traverse octree vertices.
+		_vert_proc(children)
 
 # Octree vertex, dual hexahedron, takes eight nodes as arguments.
+# Assume a node's location in t in bit form is also its location relative to the other nodes.
 func _vert_proc(t: Array):
 	var num_leaves = 0
 
