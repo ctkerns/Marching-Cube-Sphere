@@ -128,7 +128,7 @@ func draw():
 	dual_arr[Mesh.ARRAY_VERTEX] = _dual_verts
 
 	mesh_instance.mesh = ArrayMesh.new()
-	#mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
+	mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
 	mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
 
 func _draw_tree():
@@ -178,18 +178,18 @@ func _cube_proc(t: int):
 		_cube_proc(children[i])
 
 	# Traverse octree faces.
-	_face_proc([children[0], children[1]])
-	_face_proc([children[0], children[2]])
-	_face_proc([children[0], children[4]])
-	_face_proc([children[1], children[3]])
-	_face_proc([children[1], children[5]])
-	_face_proc([children[2], children[3]])
-	_face_proc([children[2], children[6]])
-	_face_proc([children[3], children[7]])
-	_face_proc([children[4], children[5]])
-	_face_proc([children[4], children[6]])
-	_face_proc([children[5], children[7]])
-	_face_proc([children[6], children[7]])
+	_face_proc([children[0], children[1]], 0b001)
+	_face_proc([children[0], children[2]], 0b010)
+	_face_proc([children[0], children[4]], 0b100)
+	_face_proc([children[1], children[3]], 0b010)
+	_face_proc([children[1], children[5]], 0b100)
+	_face_proc([children[2], children[3]], 0b001)
+	_face_proc([children[2], children[6]], 0b100)
+	_face_proc([children[3], children[7]], 0b100)
+	_face_proc([children[4], children[5]], 0b001)
+	_face_proc([children[4], children[6]], 0b010)
+	_face_proc([children[5], children[7]], 0b010)
+	_face_proc([children[6], children[7]], 0b001)
 
 	# Traverse octree edges.
 	_edge_proc([children[0], children[1], children[2], children[3]])
@@ -203,68 +203,52 @@ func _cube_proc(t: int):
 	_vert_proc(children)
 
 # Octree face, dual edge, takes two nodes as arguments.
-func _face_proc(t: Array):
+func _face_proc(t: Array, axis: int):
 	var num_leaves = 0
 
 	var children = []
 	children.resize(8)
 
-	# Check if the given nodes are siblings.
-	if t[0] >> 3 == t[1] >> 3:
-		# Find the axis where the nodes are separated.
-		var axis = (t[0] & 7) ^ (t[1] & 7)
-		
-		# Arrange the nodes such that a is on the negative end of the axis, and b on the positive.
-		var a; var b
-		if t[0] & axis == 1:
-			a = t[0]
-			b = t[1]
-		else:
-			a = t[1]
-			b = t[0]
+	# Find plane that needs to be connected, with the value at the given axis always 0.
+	var plane
+	match axis:
+		0b001:
+			plane = [0b000, 0b010, 0b100, 0b110]
+		0b010:
+			plane = [0b000, 0b001, 0b100, 0b101]
+		0b100:
+			plane = [0b000, 0b001, 0b010, 0b011]
 
-		# Find plane that needs to be connected, with the value at the given axis always 0.
-		var plane
-		match axis:
-			0b001:
-				plane = [0b000, 0b010, 0b100, 0b110]
-			0b010:
-				plane = [0b000, 0b001, 0b100, 0b101]
-			0b100:
-				plane = [0b000, 0b001, 0b010, 0b011]
-
-		# Find children to be connected.
-		if _is_branch(a):
-			for i in range(4):
-				children[i] = _get_child(a, plane[i])
-		else:
-			for i in range(4):
-				children[i] = a
-			num_leaves += 1
-		
-		if _is_branch(b):
-			for i in range(4):
-				children[i + 4] = _get_child(b, plane[i] | axis)
-		else:
-			for i in range(4):
-				children[i + 4] = b
-			num_leaves += 1
-		
-		if num_leaves < 2:
-			# Recursively traverse child nodes.
-			_face_proc([children[0], children[4]])
-			_face_proc([children[1], children[5]])
-			_face_proc([children[2], children[6]])
-			_face_proc([children[3], children[7]])
-
-			_edge_proc([children[0], children[1], children[4], children[5]])
-			_edge_proc([children[0], children[2], children[4], children[6]])
-			_edge_proc([children[1], children[3], children[5], children[7]])
-			_edge_proc([children[2], children[3], children[6], children[7]])
-
-			_vert_proc(children)
+	# Find children to be connected.
+	if _is_branch(t[0]):
+		for i in range(4):
+			children[i] = _get_child(t[0], plane[i] | axis)
 	else:
-		pass
+		for i in range(4):
+			children[i] = t[0]
+		num_leaves += 1
+	
+	if _is_branch(t[1]):
+		for i in range(4):
+			children[i + 4] = _get_child(t[1], plane[i])
+	else:
+		for i in range(4):
+			children[i + 4] = t[1]
+		num_leaves += 1
+	
+	if num_leaves < 2:
+		# Recursively traverse child nodes.
+		_face_proc([children[0], children[4]], axis)
+		_face_proc([children[1], children[5]], axis)
+		_face_proc([children[2], children[6]], axis)
+		_face_proc([children[3], children[7]], axis)
+
+		_edge_proc([children[0], children[1], children[4], children[5]])
+		_edge_proc([children[0], children[2], children[4], children[6]])
+		_edge_proc([children[1], children[3], children[5], children[7]])
+		_edge_proc([children[2], children[3], children[6], children[7]])
+
+		_vert_proc(children)
 
 # Octree edge, dual face, takes four nodes as arguments.
 func _edge_proc(t: Array):
