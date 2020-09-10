@@ -1,4 +1,4 @@
-extends Planetary
+extends Spatial
 
 var Octnode = preload("res://Scripts/Octree/Octnode.gd")
 
