@@ -20,7 +20,7 @@ func draw_hexahedron_edge(v: Array, verts):
 	for i in range(8):
 		v[i] = Cube2Sphere.cube2sphere(v[i].x, v[i].y, v[i].z)
 
-	# Traverse hexahedron edges with bitstring.
+	# Traverse hexahedron edges using bitstring method.
 	var i = 0x2ef0298
 	while i > 0x2ef0:
 		# Draw each edge of the hexahedron.

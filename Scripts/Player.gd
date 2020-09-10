@@ -47,4 +47,3 @@ func _input(event):
 		var clamped_rotation = pitch.rotation_degrees
 		clamped_rotation.x = clamp(clamped_rotation.x, -90, 90)
 		pitch.rotation_degrees = clamped_rotation
-		

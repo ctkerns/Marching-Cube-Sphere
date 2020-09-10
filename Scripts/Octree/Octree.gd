@@ -2,12 +2,15 @@ extends Planetary
 
 var Octnode = preload("res://Scripts/Octree/Octnode.gd")
 
-onready var mesh_instance = get_node("MeshInstance")
+onready var borders = get_node("Borders")
 
 onready var head = Octnode.Octnode.new(0.5)
 
 onready var _tree_verts = PoolVector3Array()
 onready var _dual_verts = PoolVector3Array()
+
+onready var _surface_verts = PoolVector3Array()
+onready var _surface_indices = PoolIntArray()
 
 var _arb_factor = 4
 
@@ -129,9 +132,9 @@ func draw():
 	tree_arr[Mesh.ARRAY_VERTEX] = _tree_verts
 	dual_arr[Mesh.ARRAY_VERTEX] = _dual_verts
 
-	mesh_instance.mesh = ArrayMesh.new()
-	mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
-	mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
+	borders.mesh = ArrayMesh.new()
+	borders.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
+	borders.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
 
 func _draw_tree():
 	# Initialize stack.
