@@ -68,5 +68,5 @@ free_mouse={
 
 [rendering]
 
-environment/default_clear_color=Color( 0.2, 0.2, 0.2, 1 )
+environment/default_clear_color=Color( 0.156863, 0.156863, 0.156863, 1 )
 environment/default_environment="res://default_env.tres"
