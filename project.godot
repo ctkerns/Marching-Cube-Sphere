@@ -23,6 +23,7 @@ config/icon="res://Assets/Icons/planet_black16.png"
 
 Cube2Sphere="*res://Scripts/Singletons/Cube2Sphere.gd"
 Geometry="*res://Scripts/Singletons/Geometry.gd"
+MarchingCubes="*res://Scripts/Singletons/MarchingCubes.gd"
 
 [editor_plugins]
 
