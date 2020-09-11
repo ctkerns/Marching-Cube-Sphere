@@ -11,6 +11,7 @@ class Mesher:
 	func _init(oct):
 		_tree_verts = PoolVector3Array()
 		_dual_verts = PoolVector3Array()
+		_surface_verts = PoolVector3Array()
 		
 		_octree = oct
 
@@ -222,11 +223,15 @@ class Mesher:
 			# All nodes surrounding the vertex are leaves so draw the dual volume here.
 			var v = []
 			v.resize(8)
+			var d = []
+			d.resize(8)
 			for i in range(8):
 				v[i] = _octree.get_vertex(t[i])
 				v[i].z *= _arb_factor
+				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
+			_surface_verts = MarchingCubes.draw_cube(v, d, _surface_verts)
 		else:
 			# Recursively traverse child nodes.
 			_vert_proc(children)
