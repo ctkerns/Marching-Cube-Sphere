@@ -1,7 +1,13 @@
 extends Object
 
 class Octnode:
-	var volume
+	var _volume
 
 	func _init(vol):
-		volume = vol
+		_volume = vol
+	
+	func get_volume():
+		return _volume
+
+	func set_volume(vol):
+		_volume = vol
