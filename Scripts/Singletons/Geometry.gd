@@ -1,6 +1,6 @@
 extends Node
 
-func draw_cuboid_edge(p1, p2, verts):
+func draw_cuboid_edge(p1: Vector3, p2: Vector3, verts: PoolVector3Array):
 	# Arrange corners of the cube.
 	var v = [
 		Vector3(p1.x, p1.y, p1.z),
@@ -15,7 +15,7 @@ func draw_cuboid_edge(p1, p2, verts):
 	
 	return draw_hexahedron_edge(v, verts)
 
-func draw_hexahedron_edge(v: Array, verts):
+func draw_hexahedron_edge(v: Array, verts: PoolVector3Array):
 	# Transform corners to sphere surface.
 	for i in range(8):
 		v[i] = Cube2Sphere.cube2sphere(v[i].x, v[i].y, v[i].z)
