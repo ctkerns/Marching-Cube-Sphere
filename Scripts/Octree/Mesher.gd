@@ -3,6 +3,7 @@ extends Object
 class Mesher:
 	var _tree_verts
 	var _dual_verts
+	var _surface_verts
 
 	var _arb_factor = 4
 	var _octree
@@ -13,7 +14,7 @@ class Mesher:
 		
 		_octree = oct
 
-	func draw_tree(mesh_instance):
+	func draw_tree(tree_mesh):
 		# Set up array mesh.
 		var tree_arr = []
 		tree_arr.resize(Mesh.ARRAY_MAX)
@@ -50,22 +51,27 @@ class Mesher:
 		# Create mesh from array.
 		tree_arr[Mesh.ARRAY_VERTEX] = _tree_verts
 
-		mesh_instance.mesh = ArrayMesh.new()
-		mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
+		tree_mesh.mesh = ArrayMesh.new()
+		tree_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
 
-	func draw_dual(mesh_instance):
-		# Set up array mesh.
+	func draw_dual(dual_mesh, surface_mesh):
+		# Set up array meshes.
 		var dual_arr = []
 		dual_arr.resize(Mesh.ARRAY_MAX)
+		var surface_arr = []
+		surface_arr.resize(Mesh.ARRAY_MAX)
 
 		# Recursively traverse the octree.
 		_cube_proc(0b1)
 
 		# Create mesh from array.
 		dual_arr[Mesh.ARRAY_VERTEX] = _dual_verts
+		surface_arr[Mesh.ARRAY_VERTEX] = _surface_verts
 
-		mesh_instance.mesh = ArrayMesh.new()
-		mesh_instance.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
+		dual_mesh.mesh = ArrayMesh.new()
+		dual_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
+		surface_mesh.mesh = ArrayMesh.new()
+		surface_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, surface_arr)
 
 	func _cube_proc(t: int):
 		# Terminate when t1 is a leaf node.

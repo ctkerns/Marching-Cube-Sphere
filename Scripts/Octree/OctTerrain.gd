@@ -5,6 +5,7 @@ var Mesher = preload("res://Scripts/Octree/Mesher.gd")
 
 onready var borders = get_node("Borders")
 onready var dual = get_node("Dual")
+onready var surface = get_node("Surface")
 
 onready var octree = Octree.Octree.new()
 onready var mesher = Mesher.Mesher.new(octree)
@@ -20,4 +21,4 @@ func init():
 
 func draw():
 	mesher.draw_tree(borders)
-	mesher.draw_dual(dual)
+	mesher.draw_dual(dual, surface)

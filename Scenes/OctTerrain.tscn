@@ -13,3 +13,5 @@ material_override = ExtResource( 3 )
 [node name="Dual" type="MeshInstance" parent="."]
 material_override = ExtResource( 2 )
 cast_shadow = 0
+
+[node name="Surface" type="MeshInstance" parent="."]
