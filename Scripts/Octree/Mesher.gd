@@ -72,7 +72,7 @@ class Mesher:
 		dual_mesh.mesh = ArrayMesh.new()
 		dual_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
 		surface_mesh.mesh = ArrayMesh.new()
-		surface_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, surface_arr)
+		surface_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arr)
 
 	func _cube_proc(t: int):
 		# Terminate when t1 is a leaf node.
@@ -231,7 +231,7 @@ class Mesher:
 				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
-			_surface_verts = MarchingCubes.draw_cube(v, d, _surface_verts)
+			_surface_verts = MarchingCubes.draw_cube(v[0], v[7], d, _surface_verts)
 		else:
 			# Recursively traverse child nodes.
 			_vert_proc(children)
