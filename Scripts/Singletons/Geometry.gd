@@ -17,15 +17,18 @@ func draw_cuboid_edge(p1: Vector3, p2: Vector3, verts: PoolVector3Array):
 
 func draw_hexahedron_edge(v: Array, verts: PoolVector3Array):
 	# Transform corners to sphere surface.
+	var v_sphere = []
+	v_sphere.resize(8)
+	
 	for i in range(8):
-		v[i] = Cube2Sphere.cube2sphere(v[i].x, v[i].y, v[i].z)
+		v_sphere[i] = Cube2Sphere.cube2sphere(v[i].x, v[i].y, v[i].z)
 
 	# Traverse hexahedron edges using bitstring method.
 	var i = 0x2ef0298
 	while i > 0x2ef0:
 		# Draw each edge of the hexahedron.
-		verts.append(v[i&7])
-		verts.append(v[(i >> 14)&7])
+		verts.append(v_sphere[i&7])
+		verts.append(v_sphere[(i >> 14)&7])
 
 		i >>= 1
 
