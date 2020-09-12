@@ -16,9 +16,11 @@ class Octree:
 			
 		var prefix = loc_code << 3
 		var suffix = 0
+
+		var arb_scales = [0.7, 0.0, 0.7, 0.0, 0.7, 0.0, 0.7, 0.0]
 		
-		for _i in range(8):
-			nodes[prefix | suffix] = Octnode.Octnode.new(0.5)
+		for i in range(8):
+			nodes[prefix | suffix] = Octnode.Octnode.new(arb_scales[i])
 			suffix += 1
 			
 	# Returns true if the node has children.
