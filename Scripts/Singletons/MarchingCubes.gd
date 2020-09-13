@@ -304,7 +304,7 @@ var vertex_data = [
 	[]
 ]
 
-func draw_cube(v1: Vector3, v2: Vector3, d: Array, verts: PoolVector3Array):
+func draw_cube(v1: Vector3, v2: Vector3, d: Array, verts: PoolVector3Array, normals: PoolVector3Array):
 	var length = vector_abs(v2 - v1)
 
 	var tag = 0x00000000;
@@ -332,7 +332,11 @@ func draw_cube(v1: Vector3, v2: Vector3, d: Array, verts: PoolVector3Array):
 		verts.append(b)
 		verts.append(a)
 
-	return verts
+		normals.append(c.normalized())
+		normals.append(b.normalized())
+		normals.append(a.normalized())
+
+	return [verts, normals]
 
 func scalar_mult(v1: Vector3, v2: Vector3) -> Vector3:
 	return Vector3(v1.x*v2.x, v1.y*v2.y, v1.z*v2.z)

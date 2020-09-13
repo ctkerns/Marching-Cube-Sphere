@@ -4,6 +4,7 @@ class Mesher:
 	var _tree_verts
 	var _dual_verts
 	var _surface_verts
+	var _surface_normals
 
 	var _arb_factor = 4
 	var _octree
@@ -12,6 +13,7 @@ class Mesher:
 		_tree_verts = PoolVector3Array()
 		_dual_verts = PoolVector3Array()
 		_surface_verts = PoolVector3Array()
+		_surface_normals = PoolVector3Array()
 		
 		_octree = oct
 
@@ -68,6 +70,7 @@ class Mesher:
 		# Create mesh from array.
 		dual_arr[Mesh.ARRAY_VERTEX] = _dual_verts
 		surface_arr[Mesh.ARRAY_VERTEX] = _surface_verts
+		surface_arr[Mesh.ARRAY_NORMAL] = _surface_normals
 
 		dual_mesh.mesh = ArrayMesh.new()
 		dual_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
@@ -231,7 +234,9 @@ class Mesher:
 				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
-			_surface_verts = MarchingCubes.draw_cube(v[0], v[7], d, _surface_verts)
+			var surface = MarchingCubes.draw_cube(v[0], v[7], d, _surface_verts, _surface_normals)
+			_surface_verts = surface[0]
+			_surface_normals = surface[1]
 		else:
 			# Recursively traverse child nodes.
 			_vert_proc(children)
