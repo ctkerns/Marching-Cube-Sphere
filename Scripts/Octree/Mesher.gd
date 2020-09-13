@@ -57,7 +57,7 @@ class Mesher:
 		tree_mesh.mesh = ArrayMesh.new()
 		tree_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
 
-	func draw_dual(dual_mesh, surface_mesh):
+	func draw_dual(dual_mesh, surface_mesh) -> Shape:
 		# Set up array meshes.
 		var dual_arr = []
 		dual_arr.resize(Mesh.ARRAY_MAX)
@@ -76,6 +76,8 @@ class Mesher:
 		dual_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
 		surface_mesh.mesh = ArrayMesh.new()
 		surface_mesh.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arr)
+
+		return surface_mesh.mesh.create_trimesh_shape()
 
 	func _cube_proc(t: int):
 		# Terminate when t1 is a leaf node.

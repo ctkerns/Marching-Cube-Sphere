@@ -19,3 +19,7 @@ cast_shadow = 0
 
 [node name="Surface" type="MeshInstance" parent="."]
 material_override = SubResource( 1 )
+
+[node name="StaticBody" type="StaticBody" parent="."]
+
+[node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
