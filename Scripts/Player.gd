@@ -2,12 +2,13 @@ extends KinematicBody
 
 # Usain Bolt's max speed and acceleration while running.
 # Divided by two so I won't go into orbit.
-var _speed = 12.42771/2
-var _accelerataion = 9.5/2
+var _walk_speed = 12.42771/2
+var _walk_acceleration = 9.5/2
 var _mouse_sensitivity = 0.1
 var _velocity = Vector3()
 var _grounded = false
 var _friction = 1.0
+var _jump = 5.0
 
 onready var pitch = $PitchRotator
 onready var camera = $PitchRotator/Camera
@@ -47,12 +48,22 @@ func _physics_process(delta):
 			direction += forward.x
 		if Input.is_action_pressed("move_up"):
 			up = self.get_translation().normalized()
-			_velocity += up*10.0
+			_velocity += up*_jump
 	
-		# Walk.
-		direction = direction.normalized()*_speed
-		_velocity = _velocity.linear_interpolate(direction, _accelerataion*delta)
+		# Walk or run.
+		var speed
+		var acceleration
+		if Input.is_action_pressed("sprint"):
+			speed = _walk_speed*2
+			acceleration = _walk_acceleration*2
+		else:
+			speed = _walk_speed
+			acceleration = _walk_acceleration
 
+		direction = direction.normalized()*speed
+		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
+
+		# Friction.
 		if direction == Vector3():
 			var horizontal = _velocity - _velocity.project(-up)
 			_velocity = _velocity.linear_interpolate(-horizontal, _friction*delta)
