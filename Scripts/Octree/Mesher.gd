@@ -236,7 +236,7 @@ class Mesher:
 				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
-			var surface = MarchingCubes.draw_cube(v[0], v[7], d, _surface_verts, _surface_normals)
+			var surface = MarchingCubes.draw_cube(v, d, _surface_verts, _surface_normals)
 			_surface_verts = surface[0]
 			_surface_normals = surface[1]
 		else:

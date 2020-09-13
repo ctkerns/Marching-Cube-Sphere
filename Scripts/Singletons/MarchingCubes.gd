@@ -304,9 +304,7 @@ var vertex_data = [
 	[]
 ]
 
-func draw_cube(v1: Vector3, v2: Vector3, d: Array, verts: PoolVector3Array, normals: PoolVector3Array):
-	var length = vector_abs(v2 - v1)
-
+func draw_cube(v: Array, d: Array, verts: PoolVector3Array, normals: PoolVector3Array):
 	var tag = 0x00000000;
 	var idx = [0, 1, 4, 5, 2, 3, 6, 7]
 
@@ -318,9 +316,9 @@ func draw_cube(v1: Vector3, v2: Vector3, d: Array, verts: PoolVector3Array, norm
 	var tri_count = cell[0] & 0x0F
 
 	for i in range(tri_count):
-		var a = find_vert(vertex_data[tag][cell[1][i*3]]	, d, length) + v1
-		var b = find_vert(vertex_data[tag][cell[1][i*3 + 1]], d, length) + v1
-		var c = find_vert(vertex_data[tag][cell[1][i*3 + 2]], d, length) + v1
+		var a = find_vert(vertex_data[tag][cell[1][i*3]]	, v, d)
+		var b = find_vert(vertex_data[tag][cell[1][i*3 + 1]], v, d)
+		var c = find_vert(vertex_data[tag][cell[1][i*3 + 2]], v, d)
 		
 		# print("a: ", a, " b: ", b, " c: ", c)
 
@@ -338,13 +336,10 @@ func draw_cube(v1: Vector3, v2: Vector3, d: Array, verts: PoolVector3Array, norm
 
 	return [verts, normals]
 
-func scalar_mult(v1: Vector3, v2: Vector3) -> Vector3:
-	return Vector3(v1.x*v2.x, v1.y*v2.y, v1.z*v2.z)
-
 func vector_abs(v: Vector3) -> Vector3:
 	return Vector3(abs(v.x), abs(v.y), abs(v.z))
 
-func find_vert(edge_index, d: Array, length: Vector3) -> Vector3:
+func find_vert(edge_index, v: Array, d: Array) -> Vector3:
 	var d1
 	var d2
 
@@ -352,51 +347,51 @@ func find_vert(edge_index, d: Array, length: Vector3) -> Vector3:
 		0x01:
 			d1 = d[0b001] - threshold
 			d2 = d[0b000] - threshold
-			return scalar_mult(Vector3(0.0, 0.0, 0.5), length)
+			return v[1].linear_interpolate(v[0], 0.5)
 		0x02:
 			d1 = d[0b100] - threshold
 			d2 = d[0b000] - threshold
-			return scalar_mult(Vector3(0.5, 0.0, 0.0), length)
+			return v[4].linear_interpolate(v[0], 0.5)
 		0x04:
 			d1 = d[0b010] - threshold
 			d2 = d[0b000] - threshold
-			return scalar_mult(Vector3(0.0, 0.5, 0.0), length)
+			return v[2].linear_interpolate(v[0], 0.5)
 		0x13:
 			d1 = d[0b101] - threshold
 			d2 = d[0b001] - threshold
-			return scalar_mult(Vector3(0.5, 0.0, 1.0), length)
+			return v[5].linear_interpolate(v[1], 0.5)
 		0x15:
 			d1 = d[0b011] - threshold
 			d2 = d[0b001] - threshold
-			return scalar_mult(Vector3(0.0, 0.5, 1.0), length)
+			return v[3].linear_interpolate(v[1], 0.5)
 		0x23:
 			d1 = d[0b101] - threshold
 			d2 = d[0b100] - threshold
-			return scalar_mult(Vector3(1.0, 0.0, 0.5), length)
+			return v[5].linear_interpolate(v[4], 0.5)
 		0x26:
 			d1 = d[0b110] - threshold
 			d2 = d[0b100] - threshold
-			return scalar_mult(Vector3(1.0, 0.5, 0.0), length)
+			return v[6].linear_interpolate(v[4], 0.5)
 		0x37:
 			d1 = d[0b111] - threshold
 			d2 = d[0b101] - threshold
-			return scalar_mult(Vector3(1.0, 0.5, 1.0), length)
+			return v[7].linear_interpolate(v[5], 0.5)
 		0x45:
 			d1 = d[0b011] - threshold
 			d2 = d[0b010] - threshold
-			return scalar_mult(Vector3(0.0, 1.0, 0.5), length)
+			return v[3].linear_interpolate(v[2], 0.5)
 		0x46:
 			d1 = d[0b110] - threshold
 			d2 = d[0b010] - threshold
-			return scalar_mult(Vector3(0.5, 1.0, 0.0), length)
+			return v[6].linear_interpolate(v[2], 0.5)
 		0x57:
 			d1 = d[0b111] - threshold
 			d2 = d[0b011] - threshold
-			return scalar_mult(Vector3(0.5, 1.0, 1.0), length)
+			return v[7].linear_interpolate(v[3], 0.5)
 		0x67:
 			d1 = d[0b111] - threshold
 			d2 = d[0b110] - threshold
-			return scalar_mult(Vector3(1.0, 1.0, 0.5), length)
+			return v[7].linear_interpolate(v[6], 0.5)
 		_:
 			print("ERROR: Marching cubes edge ", edge_index, " undefined.")
 			return Vector3(0.0, 0.0, 0.0)
