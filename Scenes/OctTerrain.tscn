@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scripts/Octree/OctTerrain.gd" type="Script" id=1]
 [ext_resource path="res://Materials/dual_outline.tres" type="Material" id=2]
 [ext_resource path="res://Materials/borders_outline.tres" type="Material" id=3]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 0.317647, 0.568627, 0.345098, 1 )
 
 [node name="OctTerrain" type="Spatial"]
 script = ExtResource( 1 )
@@ -15,3 +18,4 @@ material_override = ExtResource( 2 )
 cast_shadow = 0
 
 [node name="Surface" type="MeshInstance" parent="."]
+material_override = SubResource( 1 )
