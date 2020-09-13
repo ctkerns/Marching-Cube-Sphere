@@ -1,11 +1,13 @@
 extends KinematicBody
 
-var _speed = 5
-var _acceleataion = 3
+# Usain Bolt's max speed and acceleration while running.
+# Divided by two so I won't go into orbit.
+var _speed = 12.42771/2
+var _accelerataion = 9.5/2
 var _mouse_sensitivity = 0.1
 var _velocity = Vector3()
 var _grounded = false
-var _friction = 0.99
+var _friction = 1.0
 
 onready var pitch = $PitchRotator
 onready var camera = $PitchRotator/Camera
@@ -29,7 +31,7 @@ func _process(delta):
 	self.look_at(self.get_translation() + look_forward, look_up)
 	
 func _physics_process(delta):
-	var up
+	var up = self.get_translation().normalized()
 	var direction = Vector3()
 	var forward = self.get_global_transform().basis
 	
@@ -49,10 +51,13 @@ func _physics_process(delta):
 	
 		# Walk.
 		direction = direction.normalized()*_speed
-		_velocity = _velocity.linear_interpolate(direction, _speed*delta)
+		_velocity = _velocity.linear_interpolate(direction, _accelerataion*delta)
+
+		if direction == Vector3():
+			var horizontal = _velocity - _velocity.project(-up)
+			_velocity = _velocity.linear_interpolate(-horizontal, _friction*delta)
 	
 	# Do the gravity.
-	up = self.get_translation().normalized()
 	_velocity -= up*9.8*delta
 	
 	# Collide.
@@ -60,7 +65,8 @@ func _physics_process(delta):
 	up = self.get_translation().normalized()
 	_grounded = false
 	if collision != null:
-		_velocity -= _velocity.project(-up)
+		var vertical = _velocity.project(-up)
+		_velocity -= vertical
 		_grounded = true
 
 func _input(event):
