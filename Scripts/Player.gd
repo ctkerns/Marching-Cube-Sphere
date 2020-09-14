@@ -69,7 +69,8 @@ func _physics_process(delta):
 			_velocity = _velocity.linear_interpolate(-horizontal, _friction*delta)
 	
 	# Do the gravity.
-	_velocity -= up*9.8*delta
+	if !_grounded:
+		_velocity -= up*9.8*delta
 	
 	# Collide.
 	var collision = move_and_collide(_velocity*delta)
