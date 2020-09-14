@@ -112,7 +112,7 @@ class Mesher:
 		_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
 		_edge_proc([children[1], children[3], children[5], children[7]], 0b001)
 		_edge_proc([children[2], children[3], children[6], children[7]], 0b010)
-		_edge_proc([children[4], children[6], children[5], children[7]], 0b100)
+		_edge_proc([children[4], children[5], children[6], children[7]], 0b100)
 	
 		# Traverse octree vertices.
 		_vert_proc(children)
@@ -161,15 +161,29 @@ class Mesher:
 			_face_proc([children[2], children[6]], axis)
 			_face_proc([children[3], children[7]], axis)
 	
-			# Traverse octree edges.
-			_edge_proc([children[0], children[1], children[4], children[5]], 0b010)
-			_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
-			_edge_proc([children[1], children[3], children[5], children[7]], 0b001)
-			_edge_proc([children[2], children[3], children[6], children[7]], 0b010)
-	
-			# Traverse octree vertices.
-			_vert_proc(children) # Assure that these are in the right order.
-	
+			match axis:
+				0b001:
+					_edge_proc([children[0], children[4], children[1], children[5]], 0b010)
+					_edge_proc([children[0], children[4], children[2], children[6]], 0b001)
+					_edge_proc([children[1], children[5], children[3], children[7]], 0b001)
+					_edge_proc([children[2], children[6], children[3], children[7]], 0b010)
+
+					_vert_proc([children[6], children[2], children[7], children[3], children[4], children[0], children[5], children[1]])
+				0b010:
+					_edge_proc([children[5], children[4], children[1], children[0]], 0b010)
+					_edge_proc([children[6], children[4], children[2], children[0]], 0b001)
+					_edge_proc([children[7], children[5], children[3], children[1]], 0b001)
+					_edge_proc([children[7], children[6], children[3], children[2]], 0b010)
+
+					_vert_proc([children[6], children[7], children[2], children[3], children[4], children[5], children[0], children[1]])
+				0b100:
+					_edge_proc([children[5], children[4], children[1], children[0]], 0b010)
+					_edge_proc([children[6], children[4], children[2], children[0]], 0b001)
+					_edge_proc([children[7], children[5], children[3], children[1]], 0b001)
+					_edge_proc([children[7], children[6], children[3], children[2]], 0b010)
+
+					_vert_proc(children)
+				
 	# Octree edge, dual face, takes four nodes as arguments.
 	# Assume a node's location t in bit form is also it's location relative to the other nodes on valid
 	# axes.
@@ -193,7 +207,7 @@ class Mesher:
 		for i in range(4):
 			if _octree.is_branch(t[i]):
 				children[i] = _octree.get_child(t[i], plane[3 - i])
-				children[i + 4] = _octree.get_child(t[i], plane[3 - i] | axis)
+				children[i + 4] = _octree.get_child(t[i], plane[3 -i] | axis)
 			else:
 				children[i] = t[i]
 				children[i + 4] = t[i]
@@ -205,7 +219,13 @@ class Mesher:
 			_edge_proc([children[4], children[5], children[6], children[7]], axis)
 	
 			# Traverse octree vertices.
-			_vert_proc(children)
+			match axis:
+				0b001:
+					_vert_proc([children[0], children[4], children[1], children[5], children[2], children[6], children[3], children[7]])
+				0b010:
+					_vert_proc([children[0], children[1], children[4], children[5], children[2], children[3], children[6], children[7]])
+				0b100:
+					_vert_proc(children)
 	
 	# Octree vertex, dual hexahedron, takes eight nodes as arguments.
 	# Assume a node's location in t in bit form is also its location relative to the other nodes.
