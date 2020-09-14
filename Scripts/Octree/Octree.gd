@@ -48,7 +48,7 @@ class Octree:
 		var scale = 2.0 / (pow(2, depth))
 
 		# Start at the center of the head node.
-		var vert = Vector3(0, 0, 2)
+		var vert = Vector3(0, 0, 0)
 
 		# Traverse the path of the node bottom up.
 		var n = loc_code
@@ -81,8 +81,8 @@ class Octree:
 		var depth = _get_depth(loc_code)
 		var scale = 2.0 / (pow(2, depth))
 
-		# Start at the center of the head node.
-		var vert = Vector3(-1, -1, 1)
+		# Start at the corner of the head node.
+		var vert = Vector3(-1, -1, -1)
 
 		# Traverse the path of the node bottom up.
 		var n = loc_code
@@ -97,7 +97,7 @@ class Octree:
 				vert.z += increment
 
 			# Move up a level.
-			n = n >> 3
 			increment *= 2
+			n = n >> 3
 
 		return [vert, scale]

@@ -7,6 +7,7 @@ class Mesher:
 	var _surface_normals
 
 	var _arb_factor = 4
+	var _arb_bias = 2
 	var _octree
 
 	func _init(oct):
@@ -39,7 +40,7 @@ class Mesher:
 				var vert = bounds[0]
 				var scale = bounds[1]
 
-				var arb_stretch = Vector3(vert.x, vert.y, vert.z*_arb_factor)
+				var arb_stretch = Vector3(vert.x, vert.y, (vert.z + _arb_bias)*_arb_factor)
 
 				_tree_verts = Geometry.draw_cuboid_edge(
 					arb_stretch,
@@ -252,7 +253,7 @@ class Mesher:
 			d.resize(8)
 			for i in range(8):
 				v[i] = _octree.get_vertex(t[i])
-				v[i].z *= _arb_factor
+				v[i].z = (v[i].z + _arb_bias)*_arb_factor
 				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
