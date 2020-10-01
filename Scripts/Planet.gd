@@ -4,6 +4,10 @@ var _initialized = false
 
 var _faces = []
 
+# Hyperparameters.
+# How many times the lowest level of an octree subdivided.
+var _subdivision = 1
+
 func _ready():
 	_faces.append(get_node("Face1")) # y +
 	_faces.append(get_node("Face2")) # z +
@@ -16,7 +20,7 @@ func init():
 	_initialized = true
 	
 	for face in _faces:
-		face.init()
+		face.init(_subdivision)
 
 func _draw():
 	if not _initialized:

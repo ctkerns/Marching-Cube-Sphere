@@ -6,17 +6,20 @@ class Mesher:
 	var _surface_verts
 	var _surface_normals
 
-	var _arb_factor = 4
-	var _arb_bias = 2
+	var _arb_factor = 3
+	var _base
 	var _octree
 
-	func _init(oct):
+	func _init(oct, base):
 		_tree_verts = PoolVector3Array()
 		_dual_verts = PoolVector3Array()
 		_surface_verts = PoolVector3Array()
 		_surface_normals = PoolVector3Array()
-		
+
 		_octree = oct
+
+		# Scale the base to correct for starting point at -1 and the factor that will be added.
+		_base = base/_arb_factor + 1
 
 	func draw_tree(tree_mesh):
 		# Set up array mesh.
@@ -40,7 +43,8 @@ class Mesher:
 				var vert = bounds[0]
 				var scale = bounds[1]
 
-				var arb_stretch = Vector3(vert.x, vert.y, (vert.z + _arb_bias)*_arb_factor)
+				# Value that the lower vertex is stretched to.
+				var arb_stretch = Vector3(vert.x, vert.y, (vert.z + _base)*_arb_factor)
 
 				_tree_verts = Geometry.draw_cuboid_edge(
 					arb_stretch,
@@ -253,7 +257,7 @@ class Mesher:
 			d.resize(8)
 			for i in range(8):
 				v[i] = _octree.get_vertex(t[i])
-				v[i].z = (v[i].z + _arb_bias)*_arb_factor
+				v[i].z = (v[i].z + _base)*_arb_factor
 				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
