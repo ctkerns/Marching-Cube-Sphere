@@ -18,8 +18,8 @@ class Mesher:
 
 		_octree = oct
 
-		# Scale the base to correct for starting point at -1 and the factor that will be added.
-		_base = base/_arb_factor + 1
+		# Scale the base to correct for starting point at -1 and the factor that will be added later.
+		_base = base/_arb_factor + 1 - 0.5
 
 	func draw_tree(tree_mesh):
 		# Set up array mesh.
