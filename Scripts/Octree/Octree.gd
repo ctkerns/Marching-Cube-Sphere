@@ -10,18 +10,14 @@ class Octree:
 		nodes[1] = Octnode.Octnode.new(0.5)
 		
 	# Subdivides this node by creating eight children.
-	func split(loc_code: int):
+	func split(loc_code: int, vol: Array):
 		if _get_depth(loc_code) > 20:
 			return
 			
 		var prefix = loc_code << 3
-		var suffix = 0
-
-		var arb_scales = [0.7, 0.0, 0.7, 0.0, 0.7, 0.0, 0.7, 0.0]
 		
 		for i in range(8):
-			nodes[prefix | suffix] = Octnode.Octnode.new(arb_scales[i])
-			suffix += 1
+			nodes[prefix | i] = Octnode.Octnode.new(vol[i])
 			
 	# Returns true if the node has children.
 	func is_branch(loc_code: int):

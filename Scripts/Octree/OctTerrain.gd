@@ -8,7 +8,7 @@ onready var dual = get_node("Dual")
 onready var surface = get_node("Surface")
 onready var collision_shape = get_node("StaticBody/CollisionShape")
 
-onready var octree = Octree.Octree.new()
+var octree = Octree.Octree.new()
 var mesher
 
 # Hyperparameters.
@@ -31,6 +31,7 @@ func init(subdivision, levels):
 	_segments = pow(2, subdivision)*4
 	_circumradius = 1/(2*sin(PI/_segments))
 
+	octree = Octree.Octree.new()
 	mesher = Mesher.Mesher.new(octree, _circumradius)
 
 	_full_subdivision()
@@ -49,11 +50,30 @@ func _full_subdivision():
 
 	for i in range(_levels):
 		for j in range(queue.size()):
-			# Split each node in the queue, and add the upper nodes to the queue.
+			# Find the volume for each child.
 			var node = queue.pop_front()
-			octree.split(node)
+			var volumes = []
+			for k in range(8):
+				var child = octree.get_child(node, k)
+				var vert = _global_vert(octree.get_vertex(child))
+				volumes.append(Generator.sample(vert.x, vert.y, vert.z))
+			
+			# Split each node in the queue, and add the upper nodes to the queue.
+			octree.split(node, volumes)
 
 			queue.push_back((node << 3) | 0b001)
 			queue.push_back((node << 3) | 0b011)
 			queue.push_back((node << 3) | 0b101)
 			queue.push_back((node << 3) | 0b111)
+
+# Takes a location in the octree and converts it to global space.
+func _global_vert(vert: Vector3):
+	var transform = self.get_transform()
+
+	var arb_factor = 3
+	var base = _circumradius/arb_factor + 1 - 0.5
+	var local_vert = Cube2Sphere.cube2sphere(vert.x, vert.y, (vert.z + base)*arb_factor)
+
+	var global_vert = transform.xform(local_vert)
+
+	return global_vert
