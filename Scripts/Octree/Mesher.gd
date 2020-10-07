@@ -140,58 +140,56 @@ class Mesher:
 			0b100:
 				plane = [0b000, 0b001, 0b010, 0b011]
 	
-		# Find children to be connected.
+		# Find children to be connected. Location in the array will be on the opposite side through
+		# the axis.
+
+		# Inferior node.
 		if _octree.is_branch(t[0]):
 			for i in range(4):
-				children[i] = _octree.get_child(t[0], plane[i] | axis)
+				children[plane[i]] = _octree.get_child(t[0], plane[i] | axis)
 		else:
 			# If node is a leaf, use the node as a stand in for its child.
 			for i in range(4):
-				children[i] = t[0]
+				children[plane[i]] = t[0]
 			num_leaves += 1
 		
+		# Superior node.
 		if _octree.is_branch(t[1]):
 			for i in range(4):
-				children[i + 4] = _octree.get_child(t[1], plane[i])
+				children[plane[i] | axis] = _octree.get_child(t[1], plane[i])
 		else:
 			# If node is a leaf, use the node as a stand in for its child.
 			for i in range(4):
-				children[i + 4] = t[1]
+				children[plane[i] | axis] = t[1]
 			num_leaves += 1
 		
 		if num_leaves < 2:
 			# Recursively traverse child nodes.
-			_face_proc([children[0], children[4]], axis)
-			_face_proc([children[1], children[5]], axis)
-			_face_proc([children[2], children[6]], axis)
-			_face_proc([children[3], children[7]], axis)
+			for i in range(4):
+				_face_proc([children[plane[i]], children[plane[i] | axis]], axis)
 	
 			match axis:
 				0b001:
-					_edge_proc([children[0], children[4], children[1], children[5]], 0b010)
-					_edge_proc([children[0], children[4], children[2], children[6]], 0b001)
-					_edge_proc([children[1], children[5], children[3], children[7]], 0b001)
-					_edge_proc([children[2], children[6], children[3], children[7]], 0b010)
-
-					_vert_proc([children[6], children[2], children[7], children[3], children[4], children[0], children[5], children[1]])
+					_edge_proc([children[0], children[1], children[4], children[5]], 0b010)
+					_edge_proc([children[0], children[1], children[2], children[3]], 0b100)
+					_edge_proc([children[4], children[5], children[6], children[7]], 0b100)
+					_edge_proc([children[2], children[3], children[7], children[6]], 0b010)
 				0b010:
-					_edge_proc([children[5], children[4], children[1], children[0]], 0b010)
-					_edge_proc([children[6], children[4], children[2], children[0]], 0b001)
-					_edge_proc([children[7], children[5], children[3], children[1]], 0b001)
-					_edge_proc([children[7], children[6], children[3], children[2]], 0b010)
-
-					_vert_proc([children[6], children[7], children[2], children[3], children[4], children[5], children[0], children[1]])
+					_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
+					_edge_proc([children[0], children[1], children[2], children[3]], 0b100)
+					_edge_proc([children[4], children[5], children[6], children[7]], 0b100)
+					_edge_proc([children[1], children[3], children[5], children[7]], 0b001)
 				0b100:
-					_edge_proc([children[5], children[4], children[1], children[0]], 0b010)
-					_edge_proc([children[6], children[4], children[2], children[0]], 0b001)
-					_edge_proc([children[7], children[5], children[3], children[1]], 0b001)
-					_edge_proc([children[7], children[6], children[3], children[2]], 0b010)
+					_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
+					_edge_proc([children[0], children[1], children[4], children[5]], 0b010)
+					_edge_proc([children[2], children[3], children[6], children[7]], 0b010)
+					_edge_proc([children[1], children[3], children[5], children[7]], 0b001)
 
-					_vert_proc(children)
+			_vert_proc(children)
 				
 	# Octree edge, dual face, takes four nodes as arguments.
 	# Assume a node's location t in bit form is also it's location relative to the other nodes on valid
-	# axes.
+	# axes. Axis represents the commmon dimension.
 	func _edge_proc(t: Array, axis: int):
 		var num_leaves = 0
 	
