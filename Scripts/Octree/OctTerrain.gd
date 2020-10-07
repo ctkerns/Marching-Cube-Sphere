@@ -57,6 +57,16 @@ func _full_subdivision():
 				var child = octree.get_child(node, k)
 				var vert = _global_vert(octree.get_vertex(child))
 				volumes.append(Generator.sample(vert.x, vert.y, vert.z))
+
+			# Fill bottom layer.
+			if i == 0:
+				for k in range(4):
+					volumes[k*2] = 1.0
+
+			# Clear top layer.
+			if i == _levels - 1:
+				for k in range(4):
+					volumes[k*2 + 1] = 0.0
 			
 			# Split each node in the queue, and add the upper nodes to the queue.
 			octree.split(node, volumes)
