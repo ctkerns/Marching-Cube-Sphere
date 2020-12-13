@@ -6,11 +6,16 @@ class Mesher:
 	var _surface_verts
 	var _surface_normals
 
-	var _arb_factor = 3
-	var _base
 	var _octree
 
-	func _init(oct, base):
+	var _x_offset
+	var _x_scale
+	var _y_offset
+	var _y_scale
+	var _floor_radius
+	var _ceil_radius
+
+	func _init(oct, x_offset, x_scale, y_offset, y_scale, floor_radius, ceil_radius):
 		_tree_verts = PoolVector3Array()
 		_dual_verts = PoolVector3Array()
 		_surface_verts = PoolVector3Array()
@@ -18,8 +23,12 @@ class Mesher:
 
 		_octree = oct
 
-		# Scale the base to correct for starting point at -1 and the factor that will be added later.
-		_base = base/_arb_factor + 1 - 0.5
+		_x_offset = x_offset
+		_x_scale = x_scale
+		_y_offset = y_offset
+		_y_scale = y_scale
+		_floor_radius = floor_radius
+		_ceil_radius = ceil_radius
 
 	func draw_tree(tree_mesh):
 		# Set up array mesh.
@@ -44,13 +53,18 @@ class Mesher:
 				var scale = bounds[1]
 
 				# Value that the lower vertex is stretched to.
-				var arb_stretch = Vector3(vert.x, vert.y, (vert.z + _base)*_arb_factor)
+				var x = vert.x*_x_scale/2.0 + _x_offset
+				var y = vert.y*_y_scale/2.0 + _y_offset
+				var z = (vert.z*(_ceil_radius - _floor_radius) + _ceil_radius)/2
+				var corner = Vector3(x, y, z)
 
-				_tree_verts = Geometry.draw_cuboid_edge(
-					arb_stretch,
-					arb_stretch + Vector3(scale, scale, scale*_arb_factor),
-					_tree_verts
-				)
+				# Value that the ranges are stretched to.
+				var x_l = scale*2.0/_x_scale
+				var y_l = scale*2.0/_y_scale
+				var z_l = scale*(_ceil_radius - _floor_radius)/2.0
+				var length = Vector3(x_l, y_l, z_l)
+
+				_tree_verts = Geometry.draw_cuboid_edge(corner, corner + length, _tree_verts)
 			else:
 				# Add this nodes children to the stack.
 				for i in range(8):
@@ -254,8 +268,12 @@ class Mesher:
 			var d = []
 			d.resize(8)
 			for i in range(8):
-				v[i] = _octree.get_vertex(t[i])
-				v[i].z = (v[i].z + _base)*_arb_factor
+				var vert = _octree.get_vertex(t[i])
+				var x = vert.x*_x_scale/2.0 + _x_offset
+				var y = vert.y*_y_scale/2.0 + _y_offset
+				var z = (vert.z*(_ceil_radius - _floor_radius) + _ceil_radius)/2
+				v[i] = Vector3(x, y, z)
+
 				d[i] = _octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
