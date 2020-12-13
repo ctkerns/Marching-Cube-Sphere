@@ -12,29 +12,20 @@ var octree = Octree.Octree.new()
 var mesher
 
 # Hyperparameters.
-# How many times the lowest level of an octree subdivided.
-var _subdivision
+var _x_offset = 0.0
+var _x_scale = 2.0
+var _y_offset = 0.0
+var _y_scale = 2.0
+var _floor_radius = 5.0
+var _ceil_radius = 32.0
 
-# The number of vertical levels in the planet.
-var _levels
+var _depth = 3 # Depth of the octree.
 
-# The number of line segments in a great circle polygon around the sphere.
-var _segments
-
-# Radius at a vertex of a great circle polygon.
-var _circumradius
-
-func init(subdivision, levels):
-	_subdivision = subdivision
-	_levels = levels
-
-	_segments = pow(2, subdivision)*4
-	_circumradius = 1/(2*sin(PI/_segments))
-
+func init():
 	octree = Octree.Octree.new()
-	mesher = Mesher.Mesher.new(octree, _circumradius)
-
 	_full_subdivision()
+
+	mesher = Mesher.Mesher.new(octree, _x_offset, _x_scale, _y_offset, _y_scale, _floor_radius, _ceil_radius)
 
 func draw():
 	mesher.draw_tree(borders)
@@ -42,48 +33,53 @@ func draw():
 
 	collision_shape.set_shape(shape)
 
-# Fully subdivide the tree as far as is allowed.
+# Fully subdivide the tree.
 func _full_subdivision():
 	var queue = []
-
 	queue.push_back(0b1)
 
-	for i in range(_levels):
+	# Subdivide each node for each level in depth.
+	for i in range(_depth):
 		for j in range(queue.size()):
-			# Find the volume for each child.
+			# Find the volume for each child before they are created.
 			var node = queue.pop_front()
 			var volumes = []
 			for k in range(8):
 				var child = octree.get_child(node, k)
-				var vert = _global_vert(octree.get_vertex(child))
-				volumes.append(Generator.sample(vert.x, vert.y, vert.z))
+				var vert = _global_vert(_chunk_vert(octree.get_vertex(child)))
+				var bounds = octree.get_bounds(child)
 
-			# Fill bottom layer.
-			if i == 0:
-				for k in range(4):
-					volumes[k*2] = 1.0
+				var base = bounds[0].z
+				var top = base + bounds[1]
 
-			# Clear top layer.
-			if i == _levels - 1:
-				for k in range(4):
-					volumes[k*2 + 1] = 0.0
+				# Clear top and fill bottom.
+				if top == 1.0:
+					volumes.append(0.0)
+				elif base == -1.0:
+					volumes.append(1.0)
+				else:
+					volumes.append(Generator.sample(vert.x, vert.y, vert.z, _floor_radius, _ceil_radius))
 			
-			# Split each node in the queue, and add the upper nodes to the queue.
+			# Split each node in the queue, and add the nodes to the queue.
 			octree.split(node, volumes)
 
-			queue.push_back((node << 3) | 0b001)
-			queue.push_back((node << 3) | 0b011)
-			queue.push_back((node << 3) | 0b101)
-			queue.push_back((node << 3) | 0b111)
+			var prefix = node << 3
+			for k in range(8):
+				queue.push_back(prefix | k)
 
-# Takes a location in the octree and converts it to global space.
+# Takes a location in the octree and converts it based on chunk location.
+func _chunk_vert(vert: Vector3):
+	var x = vert.x*_x_scale/2.0 + _x_offset
+	var y = vert.y*_y_scale/2.0 + _y_offset
+	var z = (vert.z*(_ceil_radius - _floor_radius) + _ceil_radius)/2
+
+	return Vector3(x, y, z)
+
+# Takes a location in the chunk and converts it to global space.
 func _global_vert(vert: Vector3):
 	var transform = self.get_transform()
 
-	var arb_factor = 3
-	var base = _circumradius/arb_factor + 1 - 0.5
-	var local_vert = Cube2Sphere.cube2sphere(vert.x, vert.y, (vert.z + base)*arb_factor)
-
+	var local_vert = Cube2Sphere.cube2sphere(vert.x, vert.y, vert.z)
 	var global_vert = transform.xform(local_vert)
 
 	return global_vert
