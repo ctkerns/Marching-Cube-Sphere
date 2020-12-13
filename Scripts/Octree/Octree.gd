@@ -2,7 +2,6 @@ extends Object
 
 class Octree:
 	var Octnode = preload("res://Scripts/Octree/Octnode.gd")
-	onready var head = Octnode.Octnode.new(0.5)
 
 	var nodes: Dictionary
 
@@ -23,7 +22,7 @@ class Octree:
 	func is_branch(loc_code: int):
 		return nodes.has(get_child(loc_code, 0))
 				
-	# Returns the depth of this node.
+	# Returns the depth of this node. Head node has depth of 0.
 	func _get_depth(loc_code: int) -> int:
 		return int( (log(loc_code) / 3) / log(2) )
 					
@@ -38,7 +37,7 @@ class Octree:
 	func get_density(loc_code: int) -> int:
 		return nodes[loc_code].get_volume()
 
-	# Returns the position of the center of this node.
+	# Returns the position of the center of this node relative to the octree.
 	func get_vertex(loc_code: int) -> Vector3:
 		var depth = _get_depth(loc_code)
 		var scale = 2.0 / (pow(2, depth))
