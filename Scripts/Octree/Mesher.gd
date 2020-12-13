@@ -187,7 +187,7 @@ class Mesher:
 					_edge_proc([children[0], children[1], children[4], children[5]], 0b010)
 					_edge_proc([children[0], children[1], children[2], children[3]], 0b100)
 					_edge_proc([children[4], children[5], children[6], children[7]], 0b100)
-					_edge_proc([children[2], children[3], children[7], children[6]], 0b010)
+					_edge_proc([children[2], children[3], children[6], children[7]], 0b010)
 				0b010:
 					_edge_proc([children[0], children[2], children[4], children[6]], 0b001)
 					_edge_proc([children[0], children[1], children[2], children[3]], 0b100)
