@@ -319,8 +319,6 @@ func draw_cube(v: Array, d: Array, verts: PoolVector3Array, normals: PoolVector3
 		var a = find_vert(vertex_data[tag][cell[1][i*3]]	, v, d)
 		var b = find_vert(vertex_data[tag][cell[1][i*3 + 1]], v, d)
 		var c = find_vert(vertex_data[tag][cell[1][i*3 + 2]], v, d)
-		
-		# print("a: ", a, " b: ", b, " c: ", c)
 
 		a = Cube2Sphere.cube2sphere(a.x, a.y, a.z)
 		b = Cube2Sphere.cube2sphere(b.x, b.y, b.z)
@@ -340,58 +338,55 @@ func vector_abs(v: Vector3) -> Vector3:
 	return Vector3(abs(v.x), abs(v.y), abs(v.z))
 
 func find_vert(edge_index, v: Array, d: Array) -> Vector3:
-	var d1
-	var d2
-
 	match(edge_index & 0xFF):
 		0x01:
-			d1 = d[0b001] - threshold
-			d2 = d[0b000] - threshold
-			return v[1].linear_interpolate(v[0], 0.5)
+			var d1 = d[0b001] - threshold
+			var d2 = d[0b000] - threshold
+			return v[0].linear_interpolate(v[1], d2/(d2 - d1))
 		0x02:
-			d1 = d[0b100] - threshold
-			d2 = d[0b000] - threshold
-			return v[4].linear_interpolate(v[0], 0.5)
+			var d1 = d[0b100] - threshold
+			var d2 = d[0b000] - threshold
+			return v[0].linear_interpolate(v[4], d2/(d2 - d1))
 		0x04:
-			d1 = d[0b010] - threshold
-			d2 = d[0b000] - threshold
-			return v[2].linear_interpolate(v[0], 0.5)
+			var d1 = d[0b010] - threshold
+			var d2 = d[0b000] - threshold
+			return v[0].linear_interpolate(v[2], d2/(d2 - d1))
 		0x13:
-			d1 = d[0b101] - threshold
-			d2 = d[0b001] - threshold
-			return v[5].linear_interpolate(v[1], 0.5)
+			var d1 = d[0b101] - threshold
+			var d2 = d[0b001] - threshold
+			return v[1].linear_interpolate(v[5], d2/(d2 - d1))
 		0x15:
-			d1 = d[0b011] - threshold
-			d2 = d[0b001] - threshold
-			return v[3].linear_interpolate(v[1], 0.5)
+			var d1 = d[0b011] - threshold
+			var d2 = d[0b001] - threshold
+			return v[1].linear_interpolate(v[3], d2/(d2 - d1))
 		0x23:
-			d1 = d[0b101] - threshold
-			d2 = d[0b100] - threshold
-			return v[5].linear_interpolate(v[4], 0.5)
+			var d1 = d[0b101] - threshold
+			var d2 = d[0b100] - threshold
+			return v[4].linear_interpolate(v[5], d2/(d2 - d1))
 		0x26:
-			d1 = d[0b110] - threshold
-			d2 = d[0b100] - threshold
-			return v[6].linear_interpolate(v[4], 0.5)
+			var d1 = d[0b110] - threshold
+			var d2 = d[0b100] - threshold
+			return v[4].linear_interpolate(v[6], d2/(d2 - d1))
 		0x37:
-			d1 = d[0b111] - threshold
-			d2 = d[0b101] - threshold
-			return v[7].linear_interpolate(v[5], 0.5)
+			var d1 = d[0b111] - threshold
+			var d2 = d[0b101] - threshold
+			return v[5].linear_interpolate(v[7], d2/(d2 - d1))
 		0x45:
-			d1 = d[0b011] - threshold
-			d2 = d[0b010] - threshold
-			return v[3].linear_interpolate(v[2], 0.5)
+			var d1 = d[0b011] - threshold
+			var d2 = d[0b010] - threshold
+			return v[2].linear_interpolate(v[3], d2/(d2 - d1))
 		0x46:
-			d1 = d[0b110] - threshold
-			d2 = d[0b010] - threshold
-			return v[6].linear_interpolate(v[2], 0.5)
+			var d1 = d[0b110] - threshold
+			var d2 = d[0b010] - threshold
+			return v[2].linear_interpolate(v[6], d2/(d2 - d1))
 		0x57:
-			d1 = d[0b111] - threshold
-			d2 = d[0b011] - threshold
-			return v[7].linear_interpolate(v[3], 0.5)
+			var d1 = d[0b111] - threshold
+			var d2 = d[0b011] - threshold
+			return v[3].linear_interpolate(v[7], d2/(d2 - d1))
 		0x67:
-			d1 = d[0b111] - threshold
-			d2 = d[0b110] - threshold
-			return v[7].linear_interpolate(v[6], 0.5)
+			var d1 = d[0b111] - threshold
+			var d2 = d[0b110] - threshold
+			return v[6].linear_interpolate(v[7], d2/(d2 - d1))
 		_:
 			print("ERROR: Marching cubes edge ", edge_index, " undefined.")
 			return Vector3(0.0, 0.0, 0.0)
