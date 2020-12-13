@@ -4,12 +4,6 @@ var _initialized = false
 
 var _faces = []
 
-# Hyperparameters.
-# How many times the lowest level of an octree subdivided.
-var _subdivision = 1
-
-# The number of vertical levels in the planet.
-var _levels = 2
 
 func _ready():
 	_faces.append(get_node("Face1")) # y +
@@ -23,7 +17,7 @@ func init():
 	_initialized = true
 	
 	for face in _faces:
-		face.init(_subdivision, _levels)
+		face.init()
 
 func _draw():
 	if not _initialized:
