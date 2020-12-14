@@ -328,9 +328,11 @@ func draw_cube(v: Array, d: Array, verts: PoolVector3Array, normals: PoolVector3
 		verts.append(b)
 		verts.append(a)
 
-		normals.append(c.normalized())
-		normals.append(b.normalized())
-		normals.append(a.normalized())
+		var face_normal = ((b-a).cross(c-a)).normalized()
+
+		normals.append(face_normal)
+		normals.append(face_normal)
+		normals.append(face_normal)
 
 	return [verts, normals]
 
