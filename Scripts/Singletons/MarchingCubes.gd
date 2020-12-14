@@ -320,9 +320,9 @@ func draw_cube(v: Array, d: Array, verts: PoolVector3Array, normals: PoolVector3
 		var b = find_vert(vertex_data[tag][cell[1][i*3 + 1]], v, d)
 		var c = find_vert(vertex_data[tag][cell[1][i*3 + 2]], v, d)
 
-		a = Cube2Sphere.cube2sphere(a.x, a.y, a.z)
-		b = Cube2Sphere.cube2sphere(b.x, b.y, b.z)
-		c = Cube2Sphere.cube2sphere(c.x, c.y, c.z)
+		a = Transformations.cube2sphere(a.x, a.y, a.z)
+		b = Transformations.cube2sphere(b.x, b.y, b.z)
+		c = Transformations.cube2sphere(c.x, c.y, c.z)
 
 		verts.append(c)
 		verts.append(b)

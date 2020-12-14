@@ -21,10 +21,10 @@ config/icon="res://Assets/Icons/planet_black16.png"
 
 [autoload]
 
-Cube2Sphere="*res://Scripts/Singletons/Cube2Sphere.gd"
 Geometry="*res://Scripts/Singletons/Geometry.gd"
 MarchingCubes="*res://Scripts/Singletons/MarchingCubes.gd"
 Generator="*res://Scripts/Singletons/Generator.gd"
+Transformations="*res://Scripts/Singletons/Transformations.gd"
 
 [editor_plugins]
 

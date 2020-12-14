@@ -5,6 +5,7 @@ var projection = preload("res://Scripts/CubeSphere Projections/ProjectionASC.gd"
 var _ax1 = Vector3(0, 0, 1)
 var _ax2
 
+# Takes a location in polar coordinates and maps it to a sphere.
 func cube2sphere(x, y, z):
 	# Establish starting vertex.
 	var vert = Vector3(0, 1, 0)
@@ -25,3 +26,11 @@ func cube2sphere(x, y, z):
 	vert *= z
 	
 	return vert
+
+# Takes a location in the local cube and converts it to global space.
+func cube2global(vert: Vector3, transform: Transform):
+	var local_vert = cube2sphere(vert.x, vert.y, vert.z)
+	var global_vert = transform.xform(local_vert)
+
+	return global_vert
+	

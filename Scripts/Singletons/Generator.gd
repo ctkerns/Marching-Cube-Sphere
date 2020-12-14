@@ -14,7 +14,7 @@ func sample(x: float, y: float, z: float, base, top) -> float:
 
 	var magnitude = Vector3(x, y, z).length()
 
-	vol = (magnitude - top)/(base - top) + vol/2.0
+	vol = (magnitude - top)/(base - top) + vol/1.0
 
 	if vol > 1.0:
 		vol = 1.0

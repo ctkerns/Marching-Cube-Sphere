@@ -21,7 +21,7 @@ func draw_hexahedron_edge(v: Array, verts: PoolVector3Array):
 	v_sphere.resize(8)
 	
 	for i in range(8):
-		v_sphere[i] = Cube2Sphere.cube2sphere(v[i].x, v[i].y, v[i].z)
+		v_sphere[i] = Transformations.cube2sphere(v[i].x, v[i].y, v[i].z)
 
 	# Traverse hexahedron edges using bitstring method.
 	var i = 0x2ef0298
