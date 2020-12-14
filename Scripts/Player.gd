@@ -1,7 +1,7 @@
 extends KinematicBody
 
 # Usain Bolt's max speed and acceleration while running.
-# Divided by two so I won't go into orbit.
+# Divided by two when walking.
 var _walk_speed = 12.42771/2
 var _walk_acceleration = 9.5/2
 var _mouse_sensitivity = 0.1
@@ -9,6 +9,8 @@ var _velocity = Vector3()
 var _grounded = false
 var _friction = 1.0
 var _jump = 5.0
+
+var _flying = false
 
 onready var pitch = $PitchRotator
 onready var camera = $PitchRotator/Camera
@@ -18,6 +20,10 @@ func _ready():
 	self.set_rotation(Vector3())
 	
 func _process(delta):
+	# Fly mode.
+	if Input.is_action_just_pressed("fly"):
+		_flying = not _flying
+
 	# Free the mouse.
 	if Input.is_action_just_pressed("free_mouse"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
@@ -37,7 +43,7 @@ func _physics_process(delta):
 	var forward = self.get_global_transform().basis
 	
 	# Find the player's intended direction.
-	if _grounded:
+	if _grounded or _flying:
 		if Input.is_action_pressed("move_forward"):
 			direction -= forward.z
 		if Input.is_action_pressed("move_backward"):
@@ -49,6 +55,9 @@ func _physics_process(delta):
 		if Input.is_action_pressed("move_up"):
 			up = self.get_translation().normalized()
 			_velocity += up*_jump
+		if Input.is_action_pressed("move_down") and _flying:
+			up = self.get_translation().normalized()
+			_velocity -= up*_jump
 	
 		# Walk or run.
 		var speed
@@ -60,6 +69,11 @@ func _physics_process(delta):
 			speed = _walk_speed
 			acceleration = _walk_acceleration
 
+		# Fast flying.
+		if _flying:
+			acceleration = acceleration*4
+			speed = speed*4
+
 		direction = direction.normalized()*speed
 		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
 
@@ -69,7 +83,7 @@ func _physics_process(delta):
 			_velocity = _velocity.linear_interpolate(-horizontal, _friction*delta)
 	
 	# Do the gravity.
-	if !_grounded:
+	if !_grounded and !_flying:
 		_velocity -= up*9.8*delta
 	
 	# Collide.
