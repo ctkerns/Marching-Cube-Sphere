@@ -5,7 +5,7 @@
 [ext_resource path="res://Scripts/PlanetFace.gd" type="Script" id=3]
 
 [sub_resource type="SpatialMaterial" id=1]
-albedo_color = Color( 0.356863, 0.580392, 0.278431, 1 )
+albedo_color = Color( 0.298039, 0.470588, 0.164706, 1 )
 
 [node name="PlanetFace" type="Spatial"]
 script = ExtResource( 3 )

@@ -90,5 +90,5 @@ toggle_dual={
 
 [rendering]
 
-environment/default_clear_color=Color( 0.462745, 0.937255, 1, 1 )
+environment/default_clear_color=Color( 0.25098, 0.611765, 0.882353, 1 )
 environment/default_environment="res://default_env.tres"
