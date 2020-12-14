@@ -49,3 +49,14 @@ func draw():
 
 	collision_shape.set_shape(surface.mesh.create_trimesh_shape())
 
+func _input(event):
+	if event.is_action_pressed("toggle_borders"):
+		if borders.is_visible_in_tree():
+			borders.hide()
+		else:
+			borders.show()
+	if event.is_action_pressed("toggle_dual"):
+		if dual.is_visible_in_tree():
+			dual.hide()
+		else:
+			dual.show()
