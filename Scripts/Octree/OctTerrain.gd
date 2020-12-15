@@ -5,18 +5,28 @@ class OctTerrain:
 	
 	var octree
 
-	# Hyperparameters.
-	var _x_offset = 0.0
-	var _y_offset = 0.0
-	var _scale = 2.0
-	var _floor = 16.0
-	var _ceil = 64.0
+	var _x_offset
+	var _y_offset
+	var _scale
+	var _floor
+	var _ceil
+	var _depth
 
-	var _depth = 4 # Depth of the octree.
-
+	var _core
+	var _roof
 	var _transform
 
-	func init(transform):
+	func init(x_offset, y_offset, scale, floor_rad, ceil_rad, depth, core, roof, transform):
+		_x_offset = x_offset
+		_y_offset = y_offset
+		_scale = scale
+		_floor = floor_rad
+		_ceil = ceil_rad
+		_depth = depth
+
+		_core = core
+		_roof = roof
+
 		octree = Octree.Octree.new()
 		_transform = transform
 		_full_subdivision()
@@ -44,12 +54,12 @@ class OctTerrain:
 					var top = base + bounds[1]
 
 					# Clear top and fill bottom.
-					if top == 1.0:
+					if top == 1.0 and _ceil == _roof:
 						volumes.append(0.0)
-					elif base == -1.0:
+					elif base == -1.0 and _floor == _core:
 						volumes.append(1.0)
 					else:
-						volumes.append(Generator.sample(vert.x, vert.y, vert.z, _floor, _ceil))
+						volumes.append(Generator.sample(vert.x, vert.y, vert.z, _core, _roof))
 				
 				# Split each node in the queue, and add the nodes to the queue.
 				octree.split(node, volumes)

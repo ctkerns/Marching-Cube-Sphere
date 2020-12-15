@@ -9,11 +9,30 @@ onready var surface = get_node("Surface")
 onready var collision_shape = get_node("StaticBody/CollisionShape")
 
 var _mesher
-var _chunk
+var _chunks = []
+var _num_chunks = 4
+
+var _core = 0.805
+var _roof
 
 func init():
-	_chunk = OctTerrain.OctTerrain.new()
-	_chunk.init(self.get_transform())
+	# Find the roof of the entire planet.
+	var base = _core
+	for i in range(_num_chunks):
+		base += pow(2, i+1)
+	
+	_roof = base
+	
+	# Generate each chunk.
+	base = _core
+	_chunks.resize(_num_chunks)
+	for i in range(_num_chunks):
+		var height = pow(2, i+1)
+		
+		_chunks[i] = OctTerrain.OctTerrain.new()
+		_chunks[i].init(0.0, 0.0, 2.0, base, base + height, i + 1, _core, _roof, self.get_transform())
+		
+		base += height
 
 	_mesher = Mesher.Mesher.new()
 	_mesher.init()
@@ -29,8 +48,9 @@ func draw():
 	surface_arr.resize(Mesh.ARRAY_MAX)
 
 	# Create vertex data.
-	_mesher.draw_tree(_chunk)
-	_mesher.draw(_chunk)
+	for chunk in _chunks:
+		_mesher.draw_tree(chunk)
+		_mesher.draw(chunk)
 
 	# Add data to array meshes.
 	tree_arr[Mesh.ARRAY_VERTEX] = _mesher.get_tree_verts()
