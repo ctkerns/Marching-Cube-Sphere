@@ -10,27 +10,36 @@ onready var collision_shape = get_node("StaticBody/CollisionShape")
 
 var _mesher
 var _chunks = []
-var _num_chunks = 4
+var _num_levels
+var _base_depth
 
-var _core = 0.805
+var _core
 var _roof
 
-func init():
+func init(top_level, base_depth, max_depth):
+	_num_levels = top_level - base_depth + 1
+	_base_depth = base_depth
+
+	var base_segments = pow(2, base_depth)*4
+	var circumradius = 1/(2*sin(PI/base_segments))
+	_core = circumradius - 0.5
+
 	# Find the roof of the entire planet.
 	var base = _core
-	for i in range(_num_chunks):
-		base += pow(2, i+1)
+	for i in range(_num_levels):
+		base += pow(2, i + base_depth)
 	
 	_roof = base
 	
 	# Generate each chunk.
 	base = _core
-	_chunks.resize(_num_chunks)
-	for i in range(_num_chunks):
-		var height = pow(2, i+1)
+	_chunks.resize(_num_levels)
+	for i in range(_num_levels):
+		var depth = base_depth + i
+		var height = pow(2, depth)
 		
 		_chunks[i] = OctTerrain.OctTerrain.new()
-		_chunks[i].init(0.0, 0.0, 2.0, base, base + height, i + 1, _core, _roof, self.get_transform())
+		_chunks[i].init(0.0, 0.0, 2.0, base, base + height, depth, _core, _roof, self.get_transform())
 		
 		base += height
 
@@ -57,11 +66,6 @@ func draw():
 	dual_arr[Mesh.ARRAY_VERTEX] = _mesher.get_dual_verts()
 	surface_arr[Mesh.ARRAY_VERTEX] = _mesher.get_surface_verts()
 	surface_arr[Mesh.ARRAY_NORMAL] = _mesher.get_surface_normals()
-
-	# Create surfaces.
-	borders.mesh = ArrayMesh.new()
-	dual.mesh = ArrayMesh.new()
-	surface.mesh = ArrayMesh.new()
 
 	borders.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
 	dual.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
