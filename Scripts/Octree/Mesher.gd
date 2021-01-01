@@ -53,8 +53,6 @@ class Mesher:
 					stack.push_back(octree.get_child(id, i))
 
 	func draw(chunk):
-		var octree = chunk.get_tree()
-
 		# Recursively traverse the octree.
 		_cube_proc(chunk, 0b1)
 
