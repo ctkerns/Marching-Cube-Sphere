@@ -67,6 +67,10 @@ func draw():
 	surface_arr[Mesh.ARRAY_VERTEX] = _mesher.get_surface_verts()
 	surface_arr[Mesh.ARRAY_NORMAL] = _mesher.get_surface_normals()
 
+	borders.mesh = ArrayMesh.new()
+	dual.mesh = ArrayMesh.new()
+	surface.mesh = ArrayMesh.new()
+
 	borders.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, tree_arr)
 	dual.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, dual_arr)
 	surface.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arr)
