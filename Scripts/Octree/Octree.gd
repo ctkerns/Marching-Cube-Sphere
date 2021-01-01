@@ -37,6 +37,9 @@ class Octree:
 	func get_density(loc_code: int) -> int:
 		return nodes[loc_code].get_volume()
 
+	func set_density(loc_code: int, volume):
+		nodes[loc_code].set_volume(volume)
+
 	# Returns the position of the center of this node relative to the octree.
 	func get_vertex(loc_code: int) -> Vector3:
 		var depth = _get_depth(loc_code)
