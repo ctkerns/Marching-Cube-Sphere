@@ -6,7 +6,9 @@ class Octree:
 	var nodes: Dictionary
 
 	func _init():
-		nodes[1] = Octnode.Octnode.new(0.5)
+		nodes = {
+			1: Octnode.Octnode.new(0.5)
+		}
 		
 	# Subdivides this node by creating eight children.
 	func split(loc_code: int, vol: Array):
