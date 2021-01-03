@@ -304,8 +304,8 @@ var vertex_data = [
 	[]
 ]
 
-func draw_cube(v: Array, d: Array, verts: PoolVector3Array, normals: PoolVector3Array):
-	var tag = 0x00000000;
+func draw_cube(v: Array, d: Array, verts: PackedVector3Array, normals: PackedVector3Array):
+	var tag = 0x00000000
 	var idx = [0, 1, 4, 5, 2, 3, 6, 7]
 
 	for i in range(8):
@@ -340,55 +340,56 @@ func vector_abs(v: Vector3) -> Vector3:
 	return Vector3(abs(v.x), abs(v.y), abs(v.z))
 
 func find_vert(edge_index, v: Array, d: Array) -> Vector3:
-	match(edge_index & 0xFF):
+	var case = edge_index & 0xFF
+	match(case):	
 		0x01:
 			var d1 = d[0b001] - threshold
 			var d2 = d[0b000] - threshold
-			return v[0].linear_interpolate(v[1], d2/(d2 - d1))
+			return v[0].lerp(v[1], d2/(d2 - d1))
 		0x02:
 			var d1 = d[0b100] - threshold
 			var d2 = d[0b000] - threshold
-			return v[0].linear_interpolate(v[4], d2/(d2 - d1))
+			return v[0].lerp(v[4], d2/(d2 - d1))
 		0x04:
 			var d1 = d[0b010] - threshold
 			var d2 = d[0b000] - threshold
-			return v[0].linear_interpolate(v[2], d2/(d2 - d1))
+			return v[0].lerp(v[2], d2/(d2 - d1))
 		0x13:
 			var d1 = d[0b101] - threshold
 			var d2 = d[0b001] - threshold
-			return v[1].linear_interpolate(v[5], d2/(d2 - d1))
+			return v[1].lerp(v[5], d2/(d2 - d1))
 		0x15:
 			var d1 = d[0b011] - threshold
 			var d2 = d[0b001] - threshold
-			return v[1].linear_interpolate(v[3], d2/(d2 - d1))
+			return v[1].lerp(v[3], d2/(d2 - d1))
 		0x23:
 			var d1 = d[0b101] - threshold
 			var d2 = d[0b100] - threshold
-			return v[4].linear_interpolate(v[5], d2/(d2 - d1))
+			return v[4].lerp(v[5], d2/(d2 - d1))
 		0x26:
 			var d1 = d[0b110] - threshold
 			var d2 = d[0b100] - threshold
-			return v[4].linear_interpolate(v[6], d2/(d2 - d1))
+			return v[4].lerp(v[6], d2/(d2 - d1))
 		0x37:
 			var d1 = d[0b111] - threshold
 			var d2 = d[0b101] - threshold
-			return v[5].linear_interpolate(v[7], d2/(d2 - d1))
+			return v[5].lerp(v[7], d2/(d2 - d1))
 		0x45:
 			var d1 = d[0b011] - threshold
 			var d2 = d[0b010] - threshold
-			return v[2].linear_interpolate(v[3], d2/(d2 - d1))
+			return v[2].lerp(v[3], d2/(d2 - d1))
 		0x46:
 			var d1 = d[0b110] - threshold
 			var d2 = d[0b010] - threshold
-			return v[2].linear_interpolate(v[6], d2/(d2 - d1))
+			return v[2].lerp(v[6], d2/(d2 - d1))
 		0x57:
 			var d1 = d[0b111] - threshold
 			var d2 = d[0b011] - threshold
-			return v[3].linear_interpolate(v[7], d2/(d2 - d1))
+			return v[3].lerp(v[7], d2/(d2 - d1))
 		0x67:
 			var d1 = d[0b111] - threshold
 			var d2 = d[0b110] - threshold
-			return v[6].linear_interpolate(v[7], d2/(d2 - d1))
+			return v[6].lerp(v[7], d2/(d2 - d1))
 		_:
 			print("ERROR: Marching cubes edge ", edge_index, " undefined.")
 			return Vector3(0.0, 0.0, 0.0)
