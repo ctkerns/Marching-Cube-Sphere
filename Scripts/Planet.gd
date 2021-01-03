@@ -1,4 +1,4 @@
-extends Spatial
+extends Node3D
 
 var _faces = []
 
@@ -12,7 +12,8 @@ func _ready():
 
 func init():
 	for face in _faces:
-		face.init(3, 1, 3)
+		# depth of top, base depth, max depth
+		face.init(4, 1, 3)
 
 func _draw():
 	for face in _faces:

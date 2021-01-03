@@ -6,9 +6,9 @@ class Stitcher:
 	var _surface_normals
 
 	func init():
-		_dual_verts = PoolVector3Array()
-		_surface_verts = PoolVector3Array()
-		_surface_normals = PoolVector3Array()
+		_dual_verts = PackedVector3Array()
+		_surface_verts = PackedVector3Array()
+		_surface_normals = PackedVector3Array()
 
 	func get_dual_verts():
 		return _dual_verts

@@ -15,12 +15,12 @@ func cube2sphere(x, y, z):
 	
 	# Perform first quaternion rotation.
 	var quat1 = Quat(_ax1, ang.x)
-	vert = quat1.xform(vert)
+	vert = quat1*vert
 	
 	# Perform second quaterion rotation.
 	_ax2 = Vector3(cos(ang.x), sin(ang.x), 0)
 	var quat2 = Quat(_ax2, ang.y)
-	vert = quat2.xform(vert)
+	vert = quat2*vert
 	
 	# Scale normalized vert to appropriate radius.
 	vert *= z
@@ -30,7 +30,7 @@ func cube2sphere(x, y, z):
 # Takes a location in the local cube and converts it to global space.
 func cube2global(vert: Vector3, transform: Transform):
 	var local_vert = cube2sphere(vert.x, vert.y, vert.z)
-	var global_vert = transform.xform(local_vert)
+	var global_vert = transform*local_vert
 
 	return global_vert
 	

@@ -1,12 +1,12 @@
-extends Spatial
+extends Node3D
 
 var OctTerrain = preload("res://Scripts/Octree/OctTerrain.gd")
 var Mesher = preload("res://Scripts/Octree/Mesher.gd")
 
-onready var borders = get_node("Borders")
-onready var dual = get_node("Dual")
-onready var surface = get_node("Surface")
-onready var collision_shape = get_node("StaticBody/CollisionShape")
+@onready var borders = get_node("Borders")
+@onready var dual = get_node("Dual")
+@onready var surface = get_node("Surface")
+@onready var collision_shape = get_node("StaticBody/CollisionShape")
 
 var _mesher
 var _chunks = []
@@ -17,7 +17,7 @@ var _core
 var _roof
 
 func init(top_level, base_depth, max_depth):
-	_num_levels = top_level - base_depth + 1
+	_num_levels = (top_level - base_depth) + 1
 	_base_depth = base_depth
 
 	var base_segments = pow(2, base_depth)*4

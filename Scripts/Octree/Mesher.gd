@@ -7,10 +7,10 @@ class Mesher:
 	var _surface_normals
 	
 	func init():
-		_tree_verts = PoolVector3Array()
-		_dual_verts = PoolVector3Array()
-		_surface_verts = PoolVector3Array()
-		_surface_normals = PoolVector3Array()
+		_tree_verts = PackedVector3Array()
+		_dual_verts = PackedVector3Array()
+		_surface_verts = PackedVector3Array()
+		_surface_normals = PackedVector3Array()
 
 	func get_tree_verts():
 		return _tree_verts
@@ -33,7 +33,7 @@ class Mesher:
 
 		# Perform a DFS traversal of the octree using stack.
 		var id
-		while not stack.empty():
+		while not stack.is_empty():
 			# Pop frame from stack.
 			id = stack.pop_back()
 

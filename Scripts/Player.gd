@@ -1,4 +1,4 @@
-extends KinematicBody
+extends KinematicBody3D
 
 # Usain Bolt's max speed and acceleration while running.
 # Divided by two when walking.
@@ -12,8 +12,8 @@ var _jump = 5.0
 
 var _flying = false
 
-onready var pitch = $PitchRotator
-onready var camera = $PitchRotator/Camera
+@onready var pitch = $PitchRotator
+@onready var camera = $PitchRotator/Camera
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -75,12 +75,12 @@ func _physics_process(delta):
 			speed = speed*4
 
 		direction = direction.normalized()*speed
-		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
+		_velocity = _velocity.lerp(direction, acceleration*delta)
 
 		# Friction.
 		if direction == Vector3():
 			var horizontal = _velocity - _velocity.project(-up)
-			_velocity = _velocity.linear_interpolate(-horizontal, _friction*delta)
+			_velocity = _velocity.lerp(-horizontal, _friction*delta)
 	
 	# Do the gravity.
 	if !_grounded and !_flying:
