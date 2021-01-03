@@ -4,23 +4,28 @@
 [ext_resource path="res://Materials/dual_outline.tres" type="Material" id=2]
 [ext_resource path="res://Scripts/PlanetFace.gd" type="Script" id=3]
 
-[sub_resource type="SpatialMaterial" id=1]
+[sub_resource type="StandardMaterial3D" id=1]
 albedo_color = Color( 0.298039, 0.470588, 0.164706, 1 )
 
-[node name="PlanetFace" type="Spatial"]
+[node name="PlanetFace" type="Node3D"]
 script = ExtResource( 3 )
 
-[node name="Borders" type="MeshInstance" parent="."]
+[node name="Borders" type="MeshInstance3D" parent="."]
 visible = false
 material_override = ExtResource( 1 )
+script = null
 
-[node name="Dual" type="MeshInstance" parent="."]
+[node name="Dual" type="MeshInstance3D" parent="."]
 visible = false
 material_override = ExtResource( 2 )
+script = null
 
-[node name="Surface" type="MeshInstance" parent="."]
+[node name="Surface" type="MeshInstance3D" parent="."]
 material_override = SubResource( 1 )
+script = null
 
-[node name="StaticBody" type="StaticBody" parent="."]
+[node name="StaticBody" type="StaticBody3D" parent="."]
+script = null
 
-[node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
+[node name="CollisionShape" type="CollisionShape3D" parent="StaticBody"]
+script = null
