@@ -26,8 +26,3 @@ transform = Transform( 1.62921e-07, -5.30863e-14, 1, -3.25841e-07, -1, 0, 1, -3.
 
 [node name="Player" parent="." instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 4.32446e-21, 0, 1, -4.91279e-20, 4.32443e-21, 0, 1, 0, 64, 0 )
-
-[node name="CSGSphere" type="CSGSphere3D" parent="."]
-use_collision = true
-radius = 1.305
-script = null
