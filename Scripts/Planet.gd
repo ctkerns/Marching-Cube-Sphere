@@ -12,7 +12,7 @@ func _ready():
 
 func init():
 	for face in _faces:
-		face.init(3, 1, 3)
+		face.init(4, 1, 3)
 
 func _draw():
 	for face in _faces:
