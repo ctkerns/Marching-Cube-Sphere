@@ -1,7 +1,7 @@
 extends Object
 
 class OctTerrain:
-	var Octree = preload("res://Scripts/Octree/Octree.gd")
+	var Octree = preload("res://Scripts/Octree/Octree.gdns")
 	
 	var octree
 
@@ -27,7 +27,7 @@ class OctTerrain:
 		_core = core
 		_roof = roof
 
-		octree = Octree.Octree.new()
+		octree = Octree.new()
 		_transform = transform
 		_full_subdivision()
 
