@@ -1,12 +1,15 @@
 extends Object
 
 class Octree:
-	var Octnode = preload("res://Scripts/Octree/Octnode.gd")
+	var Octnode = preload("res://Scripts/Octree/Octnode.gdns")
 
 	var nodes: Dictionary
 
 	func _init():
-		nodes[1] = Octnode.Octnode.new(0.5)
+		# Create octree.
+		var head = Octnode.new()
+		head.set_volume(0.5)
+		nodes[1] = head
 		
 	# Subdivides this node by creating eight children.
 	func split(loc_code: int, vol: Array):
@@ -16,7 +19,9 @@ class Octree:
 		var prefix = loc_code << 3
 		
 		for i in range(8):
-			nodes[prefix | i] = Octnode.Octnode.new(vol[i])
+			var node = Octnode.new()
+			node.set_volume(vol[i])
+			nodes[prefix | i] = node
 			
 	# Returns true if the node has children.
 	func is_branch(loc_code: int):
