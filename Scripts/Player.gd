@@ -88,10 +88,9 @@ func _physics_process(delta):
 	
 	# Collide.
 	var collision = move_and_collide(_velocity*delta)
-	up = self.get_translation().normalized()
 	_grounded = false
 	if collision != null:
-		var vertical = _velocity.project(-up)
+		var vertical = _velocity.project(-collision.normal)
 		_velocity -= vertical
 		_grounded = true
 
