@@ -7,7 +7,8 @@ var _walk_acceleration = 9.5/2
 var _mouse_sensitivity = 0.1
 var _velocity = Vector3()
 var _grounded = false
-var _friction = 1.0
+var _friction = 0.35 # Grass coefficient of friction.
+var _gravity = 9.8 # Earth gravitational acceleration.
 var _jump = 5.0
 
 var _flying = false
@@ -76,23 +77,22 @@ func _physics_process(delta):
 
 		direction = direction.normalized()*speed
 		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
-
-		# Friction.
-		if direction == Vector3():
-			var horizontal = _velocity - _velocity.project(-up)
-			_velocity = _velocity.linear_interpolate(-horizontal, _friction*delta)
 	
 	# Do the gravity.
 	if !_grounded and !_flying:
-		_velocity -= up*9.8*delta
+		_velocity -= up*_gravity*delta
 	
 	# Collide.
 	var collision = move_and_collide(_velocity*delta)
 	_grounded = false
 	if collision != null:
-		var vertical = _velocity.project(-collision.normal)
-		_velocity -= vertical
+		var normal = _velocity.project(-collision.normal)
+		_velocity -= normal
 		_grounded = true
+
+		# Friction. Only calculate while walking.
+		if direction == Vector3():
+			_velocity = _velocity.linear_interpolate(-_velocity.normalized(), _friction*_gravity*delta)
 
 func _input(event):
 	# Rotate the camera.
