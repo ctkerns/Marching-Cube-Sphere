@@ -43,10 +43,10 @@ class Mesher:
 				var bounds = octree.get_bounds(id)
 
 				# Scale bounds from chunk space.
-				var corner = chunk.chunk2cube(bounds[0])
-				var length = chunk.length2cube(bounds[1])
+				var corner_a = chunk.to_global(bounds[0])
+				var corner_b = chunk.to_global(bounds[0] + Vector3(bounds[1], bounds[1], bounds[1]))
 
-				_tree_verts = Geometry.draw_cuboid_edge(corner, corner + length, _tree_verts)
+				_tree_verts = Geometry.draw_cuboid_edge(corner_a, corner_b, _tree_verts)
 			else:
 				# Add this nodes children to the stack.
 				for i in range(8):
@@ -235,7 +235,7 @@ class Mesher:
 			d.resize(8)
 			for i in range(8):
 				var vert = octree.get_vertex(t[i])
-				v[i] = chunk.chunk2cube(vert)
+				v[i] = chunk.to_global(vert)
 
 				d[i] = octree.get_density(t[i])
 	

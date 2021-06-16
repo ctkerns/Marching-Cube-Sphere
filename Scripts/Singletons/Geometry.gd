@@ -27,8 +27,8 @@ func draw_hexahedron_edge(v: Array, verts: PoolVector3Array):
 	var i = 0x2ef0298
 	while i > 0x2ef0:
 		# Draw each edge of the hexahedron.
-		verts.append(v_sphere[i&7])
-		verts.append(v_sphere[(i >> 14)&7])
+		verts.append(v[i&7])
+		verts.append(v[(i >> 14)&7])
 
 		i >>= 1
 
