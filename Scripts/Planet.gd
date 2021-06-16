@@ -3,6 +3,7 @@ extends Spatial
 var _chunks = []
 
 var _radius
+var _chunk_depth = 5
 
 var Mesher = preload("res://Scripts/Octree/Mesher.gd")
 var Generator = preload("res://Scripts/Generator.gd")
@@ -23,7 +24,7 @@ func init(radius):
 	_generator = Generator.new(_radius)
 
 	for chunk in _chunks:
-		chunk.init(4, _generator)
+		chunk.init(_chunk_depth, _generator)
 		
 	_mesher = Mesher.Mesher.new()
 	_mesher.init()
