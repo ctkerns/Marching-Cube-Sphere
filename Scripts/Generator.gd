@@ -15,7 +15,7 @@ func sample(x: float, y: float, z: float) -> float:
 
 	var magnitude = Vector3(x, y, z).length()
 
-	vol = (magnitude - _radius)/(1 - _radius) + vol/1.0 + (randf()*2.0 - 1.0)/48.0 
+	vol = magnitude/-_radius + 1.0 + vol/1.0 + (randf()*2.0 - 1.0)/48.0 
 
 	if vol > 1.0:
 		vol = 1.0
