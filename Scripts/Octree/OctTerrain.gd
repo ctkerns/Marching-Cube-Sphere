@@ -6,8 +6,11 @@ var octree
 var _depth
 var threshold = 0.5 # This will be temporary.
 
-func init(depth):
+var _generator
+
+func init(depth, generator):
 	_depth = depth
+	_generator = generator
 	
 	var scale = pow(2, _depth)
 	self.scale = Vector3(scale, scale, scale)
@@ -39,7 +42,7 @@ func _generate():
 				# This needs to change if the planet is going to move.
 				vert = self.to_global(vert)
 
-				volumes.append(Generator.sample(vert.x, vert.y, vert.z, 1, 3))
+				volumes.append(_generator.sample(vert.x, vert.y, vert.z))
 			
 			# Split each node in the queue, and add the nodes to the queue.
 			octree.split(node, volumes)

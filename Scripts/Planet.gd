@@ -5,7 +5,10 @@ var _chunks = []
 var _radius
 
 var Mesher = preload("res://Scripts/Octree/Mesher.gd")
+var Generator = preload("res://Scripts/Generator.gd")
+
 var _mesher
+var _generator
 
 onready var borders = get_node("Borders")
 onready var dual = get_node("Dual")
@@ -16,10 +19,11 @@ func _ready():
 	_chunks.append(get_node("Chunk"))
 
 func init(radius):
-	for chunk in _chunks:
-		chunk.init(4)
-		
 	_radius = radius
+	_generator = Generator.new(_radius)
+
+	for chunk in _chunks:
+		chunk.init(4, _generator)
 		
 	_mesher = Mesher.Mesher.new()
 	_mesher.init()

@@ -16,10 +16,9 @@ config/icon="res://Assets/Icons/planet_black16.png"
 
 [autoload]
 
-Geometry="*res://Scripts/Singletons/Geometry.gd"
 MarchingCubes="*res://Scripts/Singletons/MarchingCubes.gd"
-Generator="*res://Scripts/Singletons/Generator.gd"
 Transformations="*res://Scripts/Singletons/Transformations.gd"
+Geometry="*res://Scripts/Singletons/Geometry.gd"
 
 [editor_plugins]
 
