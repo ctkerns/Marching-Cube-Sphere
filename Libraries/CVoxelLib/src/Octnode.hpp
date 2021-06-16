@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Godot.hpp>
 #include <Object.hpp>
 

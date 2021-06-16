@@ -4,6 +4,7 @@
 
 void Octree::_register_methods() {
 	godot::register_method("split", &Octree::split);
+	godot::register_method("delete_node", &Octree::delete_node);
 	godot::register_method("is_branch", &Octree::is_branch);
 	godot::register_method("get_depth", &Octree::get_depth);
 	godot::register_method("get_child", &Octree::get_child);
@@ -37,6 +38,14 @@ void Octree::split(int loc_code, godot::Array vol) {
 		node->set_volume(vol[i]);
 		m_nodes[prefix | i] = node;
 	}
+}
+
+// Deletes this node, but not its children. This is unsafe.
+void Octree::delete_node(int loc_code) {
+	Octnode *node = m_nodes[loc_code];
+	delete node;
+
+	m_nodes.erase(loc_code);
 }
 
 // Returns true if the node has children.

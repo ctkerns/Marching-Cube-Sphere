@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Godot.hpp>
 #include <Object.hpp>
 
@@ -12,6 +14,7 @@ public:
 	void _init();
 
 	void split(int loc_code, godot::Array);
+	void delete_node(int loc_code);
 	bool is_branch(int loc_code);
 
 	int get_depth(int loc_code);
