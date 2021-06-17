@@ -16,7 +16,6 @@ config/icon="res://Assets/Icons/planet_black16.png"
 
 [autoload]
 
-Transformations="*res://Scripts/Singletons/Transformations.gd"
 Geometry="*res://Scripts/Singletons/Geometry.gd"
 
 [editor_plugins]
