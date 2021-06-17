@@ -14,10 +14,6 @@ config/name="Marching Cube Sphere"
 run/main_scene="res://Scenes/Universe.tscn"
 config/icon="res://Assets/Icons/planet_black16.png"
 
-[autoload]
-
-Geometry="*res://Scripts/Singletons/Geometry.gd"
-
 [editor_plugins]
 
 enabled=PoolStringArray(  )

@@ -7,7 +7,10 @@ class Mesher:
 	var _surface_normals
 	
 	var MarchingCubes = preload("res://Scripts/MarchingCubes.gdns")
+	var Geometry = preload("res://Scripts/Geometry.gdns")
+	
 	var _mc
+	var _geometry
 	
 	func init():
 		_tree_verts = PoolVector3Array()
@@ -16,6 +19,7 @@ class Mesher:
 		_surface_normals = PoolVector3Array()
 
 		_mc = MarchingCubes.new()
+		_geometry = Geometry.new()
 
 	func get_tree_verts():
 		return _tree_verts
@@ -51,7 +55,7 @@ class Mesher:
 				var corner_a = chunk.to_global(bounds[0])
 				var corner_b = chunk.to_global(bounds[0] + Vector3(bounds[1], bounds[1], bounds[1]))
 
-				_tree_verts = Geometry.draw_cuboid_edge(corner_a, corner_b, _tree_verts)
+				_tree_verts = _geometry.draw_cuboid_edge(corner_a, corner_b, _tree_verts)
 			else:
 				# Add this nodes children to the stack.
 				for i in range(8):
@@ -244,7 +248,7 @@ class Mesher:
 
 				d[i] = octree.get_density(t[i])
 	
-			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
+			_dual_verts = _geometry.draw_hexahedron_edge(v, _dual_verts)
 			var surface = _mc.draw_cube(v, d, _surface_verts, _surface_normals)
 			_surface_verts = surface[0]
 			_surface_normals = surface[1]
