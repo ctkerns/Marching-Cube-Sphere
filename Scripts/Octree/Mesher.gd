@@ -13,13 +13,16 @@ class Mesher:
 	var _geometry
 	
 	func init():
+		_mc = MarchingCubes.new()
+		_geometry = Geometry.new()
+
+		begin()
+
+	func begin():
 		_tree_verts = PoolVector3Array()
 		_dual_verts = PoolVector3Array()
 		_surface_verts = PoolVector3Array()
 		_surface_normals = PoolVector3Array()
-
-		_mc = MarchingCubes.new()
-		_geometry = Geometry.new()
 
 	func get_tree_verts():
 		return _tree_verts

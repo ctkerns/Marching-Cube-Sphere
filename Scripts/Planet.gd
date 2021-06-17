@@ -60,6 +60,18 @@ func draw():
 	surface.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_arr)
 
 	collision_shape.set_shape(surface.mesh.create_trimesh_shape())
+
+func clear():
+	_mesher.begin()
+
+	borders.mesh = Mesh.new()
+	dual.mesh = Mesh.new()
+	surface.mesh = Mesh.new()
+
+func _process(_delta):
+	pass
+	#clear()
+	#draw()
 	
 func _input(event):
 	if event.is_action_pressed("toggle_borders"):
