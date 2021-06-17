@@ -47,6 +47,10 @@ func _physics_process(delta):
 	var direction = Vector3()
 	var forward = self.get_global_transform().basis
 	
+	var jump = _jump
+	if _flying:
+		jump *= 4.0
+	
 	# Find the player's intended direction.
 	if _grounded or _flying:
 		if Input.is_action_pressed("move_forward"):
@@ -59,10 +63,10 @@ func _physics_process(delta):
 			direction += forward.x
 		if Input.is_action_pressed("move_up"):
 			up = self.get_translation().normalized()
-			_velocity += up*_jump
+			_velocity += up*jump
 		if Input.is_action_pressed("move_down") and _flying:
 			up = self.get_translation().normalized()
-			_velocity -= up*_jump
+			_velocity -= up*jump
 	
 		# Walk or run.
 		var speed = _speed
