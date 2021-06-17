@@ -30,7 +30,7 @@ func init(radius):
 	_mesher = Mesher.Mesher.new()
 	_mesher.init()
 
-func _draw():
+func draw():
 	# Set up array meshes.
 	var tree_arr = []
 	var dual_arr = []
