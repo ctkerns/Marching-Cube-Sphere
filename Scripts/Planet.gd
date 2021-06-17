@@ -6,7 +6,7 @@ var _radius
 var _chunk_depth = 5
 
 var Mesher = preload("res://Scripts/Octree/Mesher.gd")
-var Generator = preload("res://Scripts/Generator.gd")
+var Generator = preload("res://Scripts/Generator.gdns")
 
 var _mesher
 var _generator
@@ -21,7 +21,8 @@ func _ready():
 
 func init(radius):
 	_radius = radius
-	_generator = Generator.new(_radius)
+	_generator = Generator.new()
+	_generator.set_radius(_radius)
 
 	for chunk in _chunks:
 		chunk.init(_chunk_depth, _generator)
