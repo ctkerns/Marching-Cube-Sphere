@@ -6,11 +6,16 @@ class Mesher:
 	var _surface_verts
 	var _surface_normals
 	
+	var MarchingCubes = preload("res://Scripts/MarchingCubes.gdns")
+	var _mc
+	
 	func init():
 		_tree_verts = PoolVector3Array()
 		_dual_verts = PoolVector3Array()
 		_surface_verts = PoolVector3Array()
 		_surface_normals = PoolVector3Array()
+
+		_mc = MarchingCubes.new()
 
 	func get_tree_verts():
 		return _tree_verts
@@ -240,7 +245,7 @@ class Mesher:
 				d[i] = octree.get_density(t[i])
 	
 			_dual_verts = Geometry.draw_hexahedron_edge(v, _dual_verts)
-			var surface = MarchingCubes.draw_cube(v, d, _surface_verts, _surface_normals)
+			var surface = _mc.draw_cube(v, d, _surface_verts, _surface_normals)
 			_surface_verts = surface[0]
 			_surface_normals = surface[1]
 		else:
