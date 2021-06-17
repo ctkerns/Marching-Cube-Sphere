@@ -1,9 +1,5 @@
 extends KinematicBody
 
-# Usain Bolt's max speed and acceleration while running.
-# Divided by two when walking.
-var _walk_speed = 12.42771/2
-var _walk_acceleration = 9.5/2
 var _mouse_sensitivity = 0.1
 var _velocity = Vector3()
 var _grounded = false
@@ -11,16 +7,24 @@ var _friction = 0.35 # Grass coefficient of friction.
 var _gravity = 9.8 # Earth gravitational acceleration.
 var _jump = 5.0
 
+# These are for the animation.
+var _stride = 2.0
+var _stride_frequency = 3.0
+
+var _speed = _stride*_stride_frequency
+var _acceleration = 9.5
+
 var _flying = false
 
 onready var pitch = $PitchRotator
 onready var camera = $PitchRotator/Camera
+onready var camera_animation = $PitchRotator/Camera/AnimationPlayer
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	self.set_rotation(Vector3())
 	
-func _process(delta):
+func _process(_delta):
 	# Fly mode.
 	if Input.is_action_just_pressed("fly"):
 		_flying = not _flying
@@ -61,25 +65,29 @@ func _physics_process(delta):
 			_velocity -= up*_jump
 	
 		# Walk or run.
-		var speed
-		var acceleration
+		var speed = _speed
+		var acceleration = _acceleration
+		var frequency = _stride_frequency
 		if Input.is_action_pressed("sprint"):
-			speed = _walk_speed*2
-			acceleration = _walk_acceleration*2
-		else:
-			speed = _walk_speed
-			acceleration = _walk_acceleration
+			speed *= 1.618
+			acceleration *= 1.618
+			frequency *= 1.618
 
 		# Fast flying.
 		if _flying:
-			acceleration = acceleration*4
-			speed = speed*4
+			acceleration *= 4.0
+			speed *= 4.0
 
 		direction = direction.normalized()*speed
 		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
+
+		# Play walk animation.
+		camera_animation.playback_speed = _stride_frequency
+		if not _flying and direction != Vector3():
+			camera_animation.play("HeadBob")
 	
 	# Do the gravity.
-	if !_grounded and !_flying:
+	if not _grounded and not _flying:
 		_velocity -= up*_gravity*delta
 	
 	# Collide.
