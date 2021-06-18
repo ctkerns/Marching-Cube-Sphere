@@ -1,20 +1,18 @@
 #pragma once
 
 #include <Godot.hpp>
-#include <Object.hpp>
+#include <SurfaceTool.hpp>
 
 #define THRESHOLD 0.5f
 
-class MarchingCubes: public godot::Object {
-	GODOT_CLASS(MarchingCubes, godot::Object)
+using godot::Array;
+using godot::Vector3;
+using godot::SurfaceTool;
+
+class MarchingCubes {
 
 public:
-	static void _register_methods();
-	void _init();
-
-	godot::Array draw_cube(
-		godot::Array v, godot::Array d, godot::PoolVector3Array verts, godot::PoolVector3Array normals
-	);
-	godot::Vector3 vector_abs(godot::Vector3 v);
-	godot::Vector3 find_vert(int edge_index, godot::Array v, godot::Array d);
+	static void draw_cube(Array v, Array d, SurfaceTool *st);
+	static Vector3 vector_abs(Vector3 v);
+	static Vector3 find_vert(int edge_index, Array v, Array d);
 };

@@ -1,19 +1,7 @@
 #include "MarchingCubes.hpp"
 #include "Transvoxel.hpp"
 
-void MarchingCubes::_register_methods() {
-	godot::register_method("draw_cube", &MarchingCubes::draw_cube);
-	godot::register_method("vector_abs", &MarchingCubes::vector_abs);
-	godot::register_method("find_vert", &MarchingCubes::find_vert);
-}
-
-void MarchingCubes::_init() {
-
-}
-
-godot::Array MarchingCubes::draw_cube(
-	godot::Array v, godot::Array d, godot::PoolVector3Array verts, godot::PoolVector3Array normals
-) {
+void MarchingCubes::draw_cube(Array v, Array d, SurfaceTool *st) {
 	int tag = 0x00000000;
 	int idx[] = {0, 1, 4, 5, 2, 3, 6, 7};
 
@@ -25,34 +13,30 @@ godot::Array MarchingCubes::draw_cube(
 	int tri_count = cell.geometryCounts & 0x0F;
 
 	for (int i=0; i < tri_count; i++) {
-		godot::Vector3 a = find_vert(regularVertexData[tag][cell.vertexIndex[i*3]]	  , v, d);
-		godot::Vector3 b = find_vert(regularVertexData[tag][cell.vertexIndex[i*3 + 1]], v, d);
-		godot::Vector3 c = find_vert(regularVertexData[tag][cell.vertexIndex[i*3 + 2]], v, d);
+		Vector3 a = find_vert(regularVertexData[tag][cell.vertexIndex[i*3]]	  , v, d);
+		Vector3 b = find_vert(regularVertexData[tag][cell.vertexIndex[i*3 + 1]], v, d);
+		Vector3 c = find_vert(regularVertexData[tag][cell.vertexIndex[i*3 + 2]], v, d);
 
-		verts.append(c);
-		verts.append(b);
-		verts.append(a);
+		Vector3 face_normal = ((b-a).cross(c-a)).normalized();
 
-		godot::Vector3 face_normal = ((b-a).cross(c-a)).normalized();
+		st->add_normal(face_normal);
+		st->add_vertex(c);
 
-		normals.append(face_normal);
-		normals.append(face_normal);
-		normals.append(face_normal);
+		st->add_normal(face_normal);
+		st->add_vertex(b);
+
+		st->add_normal(face_normal);
+		st->add_vertex(a);
 	}
-
-	godot::Array retval;
-	retval.push_back(verts);
-	retval.push_back(normals);
-	return retval;
 }
 
-godot::Vector3 MarchingCubes::vector_abs(godot::Vector3 v) {
-	return godot::Vector3(abs(v.x), abs(v.y), abs(v.z));
+Vector3 MarchingCubes::vector_abs(Vector3 v) {
+	return Vector3(abs(v.x), abs(v.y), abs(v.z));
 }
 
-godot::Vector3 MarchingCubes::find_vert(int edge_index, godot::Array v, godot::Array d) {
+Vector3 MarchingCubes::find_vert(int edge_index, Array v, Array d) {
 	float d1, d2;
-	godot::Vector3 v1, v2;
+	Vector3 v1, v2;
 
 	switch(edge_index & 0xFF) {
 		case 0x01:
@@ -128,6 +112,6 @@ godot::Vector3 MarchingCubes::find_vert(int edge_index, godot::Array v, godot::A
 			v2 = v[7];
 			return v1.linear_interpolate(v2, d2/(d2 - d1));
 		default:
-			return godot::Vector3(0.0, 0.0, 0.0);
+			return Vector3(0.0, 0.0, 0.0);
 	}
 }

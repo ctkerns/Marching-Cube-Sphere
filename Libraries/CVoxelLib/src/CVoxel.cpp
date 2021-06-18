@@ -2,8 +2,6 @@
 #include "Octree.hpp"
 #include "Generator.hpp"
 #include "OctreeChunk.hpp"
-#include "MarchingCubes.hpp"
-#include "Geometry.hpp"
 #include "Mesher.hpp"
 
 extern "C" void GDN_EXPORT godot_gdnative_init(godot_gdnative_init_options *o) {
@@ -21,7 +19,5 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle) {
 	godot::register_class<Octree>();
 	godot::register_class<Generator>();
 	godot::register_class<OctreeChunk>();
-	godot::register_class<MarchingCubes>();
-	godot::register_class<Geometry>();
 	godot::register_class<Mesher>();
 }

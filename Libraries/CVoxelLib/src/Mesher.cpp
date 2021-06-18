@@ -5,42 +5,47 @@
 #include "Octree.hpp"
 
 void Mesher::_register_methods() {
-	godot::register_method("begin", &Mesher::begin);
-	godot::register_method("get_tree_verts", &Mesher::get_tree_verts);
-	godot::register_method("get_dual_verts", &Mesher::get_dual_verts);
-	godot::register_method("get_surface_verts", &Mesher::get_surface_verts);
-	godot::register_method("get_surface_normals", &Mesher::get_surface_normals);
+	godot::register_method("begin_tree", &Mesher::begin_tree);
+	godot::register_method("begin_dual", &Mesher::begin_dual);
+	godot::register_method("begin_surface", &Mesher::begin_surface);
+	godot::register_method("end_tree", &Mesher::end_tree);
+	godot::register_method("end_dual", &Mesher::end_dual);
+	godot::register_method("end_surface", &Mesher::end_surface);
 	godot::register_method("draw_tree", &Mesher::draw_tree);
 	godot::register_method("draw", &Mesher::draw);
 }
 
 void Mesher::_init() {
-	m_marching_cubes = MarchingCubes::_new();
-	m_geometry = Geometry::_new();
+	// Set up surface tools.
+	m_tree = SurfaceTool::_new();
+	m_dual = SurfaceTool::_new();
+	m_surface = SurfaceTool::_new();
 }
 
-void Mesher::begin() {
-	m_tree_verts = PoolVector3Array();
-	m_dual_verts = PoolVector3Array();
-	m_surface_verts = PoolVector3Array();
-	m_surface_normals = PoolVector3Array();
+void Mesher::begin_tree() {
+	m_tree->begin(Mesh::PRIMITIVE_LINES);
 }
 
-PoolVector3Array Mesher::get_tree_verts() {
-	return m_tree_verts;
+void Mesher::begin_dual() {
+	m_dual->begin(Mesh::PRIMITIVE_LINES);
 }
 
-PoolVector3Array Mesher::get_dual_verts() {
-	return m_dual_verts;
+void Mesher::begin_surface() {
+	m_surface->begin(Mesh::PRIMITIVE_TRIANGLES);
 }
 
-PoolVector3Array Mesher::get_surface_verts() {
-	return m_surface_verts;
+Ref<ArrayMesh> Mesher::end_tree() {
+	return m_tree->commit();
 }
 
-PoolVector3Array Mesher::get_surface_normals() {
-	return m_surface_normals;
+Ref<ArrayMesh> Mesher::end_dual() {
+	return m_dual->commit();
 }
+
+Ref<ArrayMesh> Mesher::end_surface() {
+	return m_surface->commit();
+}
+
 
 void Mesher::draw_tree(OctreeChunk *chunk) {
 	Octree *octree = chunk->get_tree();
@@ -65,7 +70,7 @@ void Mesher::draw_tree(OctreeChunk *chunk) {
 			Vector3 corner_a = chunk->to_global(bounds[0]);
 			Vector3 corner_b = chunk->to_global((Vector3)(bounds[0]) + Vector3(bounds[1], bounds[1], bounds[1]));
 
-			m_tree_verts = m_geometry->draw_cuboid_edge(corner_a, corner_b, m_tree_verts);
+			Geometry::draw_cuboid_edge(corner_a, corner_b, m_tree);
 		} else {
 			// Add this nodes children to the stack.
 			for (int i=0; i < 8; i++)
@@ -76,7 +81,7 @@ void Mesher::draw_tree(OctreeChunk *chunk) {
 
 void Mesher::draw(OctreeChunk *chunk) {
 	// Recursively traverse the octree.
-		cube_proc(chunk, 0b1);
+	cube_proc(chunk, 0b1);
 }
 
 void Mesher::cube_proc(OctreeChunk *chunk, int t) {
@@ -285,10 +290,8 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t[8]) {
 			d.push_back(octree->get_density(t[i]));
 		}
 	
-		m_dual_verts = m_geometry->draw_hexahedron_edge(v, m_dual_verts);
-		Array surface = m_marching_cubes->draw_cube(v, d, m_surface_verts, m_surface_normals);
-		m_surface_verts = surface[0];
-		m_surface_normals = surface[1];
+		Geometry::draw_hexahedron_edge(v, m_dual);
+		MarchingCubes::draw_cube(v, d, m_surface);
 	} else
 		// Recursively traverse child nodes.
 		vert_proc(chunk, children);

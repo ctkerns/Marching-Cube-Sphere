@@ -2,22 +2,21 @@
 
 #include <Godot.hpp>
 #include <Object.hpp>
+#include <SurfaceTool.hpp>
 
 using godot::Array;
-using godot::PoolVector3Array;
+using godot::Vector3;
+using godot::SurfaceTool;
+using godot::Ref;
 
-class Geometry: public godot::Object {
-	GODOT_CLASS(Geometry, godot::Object)
+class Geometry {
 
 public:
-	static void _register_methods();
-	void _init();
-
-	PoolVector3Array draw_cuboid_edge(
-		godot::Vector3 p1, godot::Vector3 p2, PoolVector3Array verts
+	static void draw_cuboid_edge(
+		Vector3 p1, Vector3 p2, SurfaceTool *st
 	);
 
-	PoolVector3Array draw_hexahedron_edge(
-		Array v, PoolVector3Array verts
+	static void draw_hexahedron_edge(
+		Array v, SurfaceTool *st
 	);
 };
