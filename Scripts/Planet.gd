@@ -15,6 +15,7 @@ onready var borders = get_node("Borders")
 onready var dual = get_node("Dual")
 onready var surface = get_node("Surface")
 onready var collision_shape = get_node("StaticBody/CollisionShape")
+onready var player = get_node("Player")
 
 func _ready():
 	_chunks.append(get_node("Chunk"))
@@ -24,6 +25,9 @@ func init(radius):
 	_generator = Generator.new()
 	_generator.set_radius(_radius)
 
+	# Set the players position so they don't get stuck.
+	player.translation.y =  _radius
+	
 	for chunk in _chunks:
 		chunk.init(_chunk_depth, _generator)
 		
