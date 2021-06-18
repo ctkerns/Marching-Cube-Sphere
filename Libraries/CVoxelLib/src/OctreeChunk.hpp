@@ -7,8 +7,13 @@
 #include "Octree.hpp"
 #include "Generator.hpp"
 
-class OctreeChunk: public godot::Spatial {
-	GODOT_CLASS(OctreeChunk, godot::Spatial)
+using godot::Spatial;
+using godot::Vector3;
+using godot::Variant;
+using godot::Array;
+
+class OctreeChunk: public Spatial {
+	GODOT_CLASS(OctreeChunk, Spatial)
 
 private:
 	Octree *m_tree;

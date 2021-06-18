@@ -18,13 +18,13 @@ void OctreeChunk::init(int depth, Generator *generator) {
 	m_generator = generator;
 	
 	float scale = pow(2, m_depth);
-	set_scale(godot::Vector3(scale, scale, scale));
+	set_scale(Vector3(scale, scale, scale));
 		
 	generate();
 }
 
 Octree *OctreeChunk::get_tree() {
-	return godot::Variant(m_tree);
+	return Variant(m_tree);
 }
 
 // Generate the tree while removing empty space.
@@ -40,10 +40,10 @@ void OctreeChunk::generate() {
 			// Find the volume for each child before they are created.
 			int node = queue.front();
 			queue.pop();
-			godot::Array volumes;
+			Array volumes;
 			for (int k=0; k < 8; k++) {
 				int child = m_tree->get_child(node, k);
-				godot::Vector3 vert = m_tree->get_vertex(child);
+				Vector3 vert = m_tree->get_vertex(child);
 
 				// This needs to change if the planet is going to move.
 				vert = to_global(vert);
@@ -69,13 +69,9 @@ void OctreeChunk::generate() {
 			int node = backtrack.back();
 			backtrack.pop_back();
 
-			//----
-
 			// Check if the children are homogenous.
 			bool homogenous = true;
 			float first_child = m_tree->get_density(m_tree->get_child(node, 0)) >= threshold;
-
-			//----
 
 			for (int k=1; k < 8; k++) {
 				float child = m_tree->get_density(m_tree->get_child(node, k)) >= threshold;
