@@ -1,6 +1,4 @@
-#include "Octnode.hpp"
 #include "Octree.hpp"
-#include <Variant.hpp>
 
 void Octree::_register_methods() {
 	godot::register_method("split", &Octree::split);
@@ -14,27 +12,26 @@ void Octree::_register_methods() {
 	godot::register_method("get_vertex", &Octree::get_vertex);
 	godot::register_method("get_bounds", &Octree::get_bounds);
 
-	void split(int loc_code, godot::Array);
+	void split(int loc_code, Array);
 	bool is_branch(int loc_code);
 }
 
 void Octree::_init() {
 	// Create octree.
-	Octnode *head = Octnode::_new();
-	head->set_volume(0.5);
+	Octnode *head = new Octnode(0.5);
 
-	m_nodes[1] = godot::Variant(head);
+	m_nodes[1] = head;
 }
 
 // Subdivides this node by creating eight children.
-void Octree::split(int loc_code, godot::Array vol) {
+void Octree::split(int loc_code, Array vol) {
 	if (get_depth(loc_code) > 20)
 		return;
 		
 	int prefix = loc_code << 3;
 	
 	for(int i=0; i < 8; i++) {
-		Octnode *node = Octnode::_new();
+		Octnode *node = new Octnode(vol[i]);
 		node->set_volume(vol[i]);
 		m_nodes[prefix | i] = node;
 	}
@@ -50,7 +47,7 @@ void Octree::delete_node(int loc_code) {
 
 // Returns true if the node has children.
 bool Octree::is_branch(int loc_code) {
-	return m_nodes.has(get_child(loc_code, 0));
+	return m_nodes.count(get_child(loc_code, 0)) > 0;
 }
 			
 // Returns the depth of this node. Head node has depth of 0.
@@ -79,12 +76,12 @@ void Octree::set_density(int loc_code, float volume) {
 }
 
 // Returns the position of the center of this node relative to the octree.
-godot::Vector3 Octree::get_vertex(int loc_code) {
+Vector3 Octree::get_vertex(int loc_code) {
 	int depth = get_depth(loc_code);
 	float scale = 2.0 / pow(2, depth);
 
 	// Start at the center of the head node.
-	godot::Vector3 vert = godot::Vector3(0, 0, 0);
+	Vector3 vert = Vector3(0, 0, 0);
 
 	// Traverse the path of the node bottom up.
 	int n = loc_code;
@@ -115,12 +112,12 @@ godot::Vector3 Octree::get_vertex(int loc_code) {
 }
 
 // Returns the bounding box of the node. 
-godot::Array Octree::get_bounds(int loc_code) {
+Array Octree::get_bounds(int loc_code) {
 	int depth = get_depth(loc_code);
 	float scale = 2.0 / pow(2, depth);
 
 	// Start at the corner of the head node.
-	godot::Vector3 vert = godot::Vector3(-1, -1, -1);
+	Vector3 vert = Vector3(-1, -1, -1);
 
 	// Traverse the path of the node bottom up.
 	int n = loc_code;
@@ -139,7 +136,7 @@ godot::Array Octree::get_bounds(int loc_code) {
 		n >>= 3;
 	}
 
-	godot::Array retval = godot::Array();
+	Array retval = Array();
 	retval.push_back(vert);
 	retval.push_back(scale);
 	return retval;
