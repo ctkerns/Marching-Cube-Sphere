@@ -17,15 +17,8 @@ void MarchingCubes::draw_cube(Array v, Array d, SurfaceTool *st) {
 		Vector3 b = find_vert(regularVertexData[tag][cell.vertexIndex[i*3 + 1]], v, d);
 		Vector3 c = find_vert(regularVertexData[tag][cell.vertexIndex[i*3 + 2]], v, d);
 
-		Vector3 face_normal = ((b-a).cross(c-a)).normalized();
-
-		st->add_normal(face_normal);
 		st->add_vertex(c);
-
-		st->add_normal(face_normal);
 		st->add_vertex(b);
-
-		st->add_normal(face_normal);
 		st->add_vertex(a);
 	}
 }

@@ -32,6 +32,7 @@ void Mesher::begin_dual() {
 
 void Mesher::begin_surface() {
 	m_surface->begin(Mesh::PRIMITIVE_TRIANGLES);
+	m_surface->add_smooth_group(true);
 }
 
 Ref<ArrayMesh> Mesher::end_tree() {
@@ -43,6 +44,8 @@ Ref<ArrayMesh> Mesher::end_dual() {
 }
 
 Ref<ArrayMesh> Mesher::end_surface() {
+	//m_surface->index();
+	m_surface->generate_normals();
 	return m_surface->commit();
 }
 
