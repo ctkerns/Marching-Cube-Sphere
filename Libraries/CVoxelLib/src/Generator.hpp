@@ -3,11 +3,15 @@
 #include <Godot.hpp>
 #include <OpenSimplexNoise.hpp>
 
-class Generator: public godot::Object {
-	GODOT_CLASS(Generator, godot::Object)
+using godot::Object;
+using godot::OpenSimplexNoise;
+using godot::Vector3;
+
+class Generator: public Object {
+	GODOT_CLASS(Generator, Object)
 
 private:
-	godot::OpenSimplexNoise *m_noise;
+	OpenSimplexNoise *m_noise;
 	float m_radius;
 
 public:
