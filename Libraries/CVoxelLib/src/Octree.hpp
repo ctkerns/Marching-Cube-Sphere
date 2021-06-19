@@ -7,19 +7,16 @@
 
 #include "Octnode.hpp"
 
-using godot::Object;
 using godot::Array;
 using godot::Vector3;
 
-class Octree: public Object {
-	GODOT_CLASS(Octree, Object)
+class Octree {
 
 private:
 	std::unordered_map<int, Octnode*> m_nodes = std::unordered_map<int, Octnode*>();
 
 public:
-	static void _register_methods();
-	void _init();
+	Octree();
 
 	void split(int loc_code, Array);
 	void delete_node(int loc_code);

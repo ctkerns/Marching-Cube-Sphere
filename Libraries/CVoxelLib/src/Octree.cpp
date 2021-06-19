@@ -1,22 +1,6 @@
 #include "Octree.hpp"
 
-void Octree::_register_methods() {
-	godot::register_method("split", &Octree::split);
-	godot::register_method("delete_node", &Octree::delete_node);
-	godot::register_method("is_branch", &Octree::is_branch);
-	godot::register_method("get_depth", &Octree::get_depth);
-	godot::register_method("get_child", &Octree::get_child);
-	godot::register_method("get_neighbor", &Octree::get_neighbor);
-	godot::register_method("get_density", &Octree::get_density);
-	godot::register_method("set_density", &Octree::set_density);
-	godot::register_method("get_vertex", &Octree::get_vertex);
-	godot::register_method("get_bounds", &Octree::get_bounds);
-
-	void split(int loc_code, Array);
-	bool is_branch(int loc_code);
-}
-
-void Octree::_init() {
+Octree::Octree() {
 	// Create octree.
 	Octnode *head = new Octnode(0.5);
 

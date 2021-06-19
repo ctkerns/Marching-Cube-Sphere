@@ -5,11 +5,10 @@
 
 void OctreeChunk::_register_methods() {
 	godot::register_method("init", &OctreeChunk::init);
-	godot::register_method("get_tree", &OctreeChunk::get_tree);
 }
 
 void OctreeChunk::_init() {
-	m_tree = Octree::_new();
+	m_tree = new Octree();
 }
 
 void OctreeChunk::init(int depth, Generator *generator) {
@@ -24,7 +23,7 @@ void OctreeChunk::init(int depth, Generator *generator) {
 }
 
 Octree *OctreeChunk::get_tree() {
-	return Variant(m_tree);
+	return m_tree;
 }
 
 // Generate the tree while removing empty space.
