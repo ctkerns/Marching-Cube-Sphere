@@ -27,13 +27,14 @@ private:
 	void cube_proc(OctreeChunk *chunk, int t);
 	void face_proc(OctreeChunk *chunk, int t0, int t1, int axis);
 	void edge_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int axis);
-	void vert_proc(OctreeChunk *chunk, int t[8]);
+	void vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7);
 
 	const int plane_x[4] = {0b000, 0b001, 0b010, 0b011};
 	const int plane_y[4] = {0b000, 0b001, 0b100, 0b101};
 	const int plane_z[4] = {0b000, 0b010, 0b100, 0b110};
 
 	inline void get_edge_children(Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves);
+	inline void get_vert_children(Octree *octree, int t, int idx, int children[8], int *num_leaves);
 
 public:
 	void static _register_methods();

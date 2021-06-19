@@ -125,7 +125,7 @@ void Mesher::cube_proc(OctreeChunk *chunk, int t) {
 	edge_proc(chunk, children[4], children[5], children[6], children[7], 0b100);
 	
 	// Traverse octree vertices.
-	vert_proc(chunk, children);
+	vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);
 }
 
 // Octree face, dual edge, takes two nodes as arguments.
@@ -202,7 +202,7 @@ void Mesher::face_proc(OctreeChunk *chunk, int t0, int t1, int axis) {
 				break;
 		}
 
-		vert_proc(chunk, children);
+		vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);
 	}
 }
 
@@ -244,13 +244,13 @@ void Mesher::edge_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int a
 		// Traverse octree vertices.
 		switch(axis) {
 			case 0b001:
-				vert_proc(chunk, new int[8] {children[0], children[4], children[1], children[5], children[2], children[6], children[3], children[7]});
+				vert_proc(chunk, children[0], children[4], children[1], children[5], children[2], children[6], children[3], children[7]);
 				break;
 			case 0b010:
-				vert_proc(chunk, new int[8] {children[0], children[1], children[4], children[5], children[2], children[3], children[6], children[7]});
+				vert_proc(chunk, children[0], children[1], children[4], children[5], children[2], children[3], children[6], children[7]);
 				break;
 			case 0b100:
-				vert_proc(chunk, children);
+				vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);
 				break;
 		}
 	}
@@ -258,38 +258,51 @@ void Mesher::edge_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int a
 
 // Octree vertex, dual hexahedron, takes eight nodes as arguments.
 // Assume a node's location in t in bit form is also its location relative to the other nodes.
-void Mesher::vert_proc(OctreeChunk *chunk, int t[8]) {
+void Mesher::vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7) {
 	Octree *octree = chunk->get_tree();
 		
 	int num_leaves = 0;
 	
 	int children[8];
 	
-	for (int i=0; i < 8; i++) {
-		if (octree->is_branch(t[i]))
-			// If node is a branch, get its child that is connected to the octree vertex.
-			children[i] = octree->get_child(t[i], 7 - i);
-		else {
-			// If node is a leaf, use the node as a stand in for its child.
-			children[i] = t[i];
-			num_leaves++;
-		}
-	}
+	get_vert_children(octree, t0, 0, children, &num_leaves);
+	get_vert_children(octree, t1, 1, children, &num_leaves);
+	get_vert_children(octree, t2, 2, children, &num_leaves);
+	get_vert_children(octree, t3, 3, children, &num_leaves);
+	get_vert_children(octree, t4, 4, children, &num_leaves);
+	get_vert_children(octree, t5, 5, children, &num_leaves);
+	get_vert_children(octree, t6, 6, children, &num_leaves);
+	get_vert_children(octree, t7, 7, children, &num_leaves);
 		
 	if (num_leaves >= 8) {
 		// All nodes surrounding the vertex are leaves so draw the dual volume here.
-		Vector3 v[8];
-		float d[8];
-		for (int i=0; i < 8; i++) {
-			v[i] = chunk->to_global(octree->get_vertex(t[i]));
-			d[i] = octree->get_density(t[i]);
-		}
+		Vector3 v[8] = {
+			chunk->to_global(octree->get_vertex(t0)),
+			chunk->to_global(octree->get_vertex(t1)),
+			chunk->to_global(octree->get_vertex(t2)),
+			chunk->to_global(octree->get_vertex(t3)),
+			chunk->to_global(octree->get_vertex(t4)),
+			chunk->to_global(octree->get_vertex(t5)),
+			chunk->to_global(octree->get_vertex(t6)),
+			chunk->to_global(octree->get_vertex(t7))
+		};
+
+		float d[8] = {
+			octree->get_density(t0),
+			octree->get_density(t1),
+			octree->get_density(t2),
+			octree->get_density(t3),
+			octree->get_density(t4),
+			octree->get_density(t5),
+			octree->get_density(t6),
+			octree->get_density(t7)
+		};
 	
 		Geometry::draw_hexahedron_edge(v, m_dual);
 		MarchingCubes::draw_cube(v, d, m_surface);
 	} else
 		// Recursively traverse child nodes.
-		vert_proc(chunk, children);
+		vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);
 }
 
 inline void Mesher::get_edge_children(Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves) {
@@ -299,6 +312,17 @@ inline void Mesher::get_edge_children(Octree *octree, int t, int idx, int childr
 	} else {
 		children[idx]	  = t;
 		children[idx + 4] = t;
+		(*num_leaves)++;
+	}
+}
+
+inline void Mesher::get_vert_children(Octree *octree, int t, int idx, int children[8], int *num_leaves) {
+	if (octree->is_branch(t))
+		// If node is a branch, get its child that is connected to the octree vertex.
+		children[idx] = octree->get_child(t, 7 - idx);
+	else {
+		// If node is a leaf, use the node as a stand in for its child.
+		children[idx] = t;
 		(*num_leaves)++;
 	}
 }
