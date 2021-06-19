@@ -117,12 +117,12 @@ void Mesher::cube_proc(OctreeChunk *chunk, int t) {
 	face_proc(chunk, children[6], children[7], 0b001);
 	
 	// Traverse octree edges.
-	edge_proc(chunk, new int[4] {children[0], children[1], children[2], children[3]}, 0b100);
-	edge_proc(chunk, new int[4] {children[0], children[1], children[4], children[5]}, 0b010);
-	edge_proc(chunk, new int[4] {children[0], children[2], children[4], children[6]}, 0b001);
-	edge_proc(chunk, new int[4] {children[1], children[3], children[5], children[7]}, 0b001);
-	edge_proc(chunk, new int[4] {children[2], children[3], children[6], children[7]}, 0b010);
-	edge_proc(chunk, new int[4] {children[4], children[5], children[6], children[7]}, 0b100);
+	edge_proc(chunk, children[0], children[1], children[2], children[3], 0b100);
+	edge_proc(chunk, children[0], children[1], children[4], children[5], 0b010);
+	edge_proc(chunk, children[0], children[2], children[4], children[6], 0b001);
+	edge_proc(chunk, children[1], children[3], children[5], children[7], 0b001);
+	edge_proc(chunk, children[2], children[3], children[6], children[7], 0b010);
+	edge_proc(chunk, children[4], children[5], children[6], children[7], 0b100);
 	
 	// Traverse octree vertices.
 	vert_proc(chunk, children);
@@ -138,16 +138,16 @@ void Mesher::face_proc(OctreeChunk *chunk, int t0, int t1, int axis) {
 	int children[8];
 	
 	// Find interior plane that needs to be connected, with the value at the given axis always 0.
-	int *plane;
+	const int (*plane)[4];
 	switch(axis) {
 		case 0b001:
-			plane = new int[4] {0b000, 0b010, 0b100, 0b110};
+			plane = &plane_z;
 			break;
 		case 0b010:
-			plane = new int[4] {0b000, 0b001, 0b100, 0b101};
+			plane = &plane_y;
 			break;
 		case 0b100:
-			plane = new int[4] {0b000, 0b001, 0b010, 0b011};
+			plane = &plane_x;
 			break;
 	}
 	
@@ -157,48 +157,48 @@ void Mesher::face_proc(OctreeChunk *chunk, int t0, int t1, int axis) {
 	// Inferior node.
 	if (octree->is_branch(t0))
 		for (int i=0; i < 4; i++)
-			children[plane[i]] = octree->get_child(t0, plane[i] | axis);
+			children[(*plane)[i]] = octree->get_child(t0, (*plane)[i] | axis);
 	else {
 		// If node is a leaf, use the node as a stand in for its child.
 		for (int i=0; i < 4; i++)
-			children[plane[i]] = t0;
+			children[(*plane)[i]] = t0;
 		num_leaves++;
 	}
 		
 	// Superior node.
 	if (octree->is_branch(t1))
 		for (int i=0; i < 4; i++)
-			children[plane[i] | axis] = octree->get_child(t1, plane[i]);
+			children[(*plane)[i] | axis] = octree->get_child(t1, (*plane)[i]);
 	else {
 		// If node is a leaf, use the node as a stand in for its child.
 		for (int i=0; i < 4; i++)
-			children[plane[i] | axis] = t1;
+			children[(*plane)[i] | axis] = t1;
 		num_leaves ++;
 	}
 		
 	if (num_leaves < 2) {
 		// Recursively traverse child nodes.
 		for (int i=0; i < 4; i++)
-			face_proc(chunk, children[plane[i]], children[plane[i] | axis], axis);
+			face_proc(chunk, children[(*plane)[i]], children[(*plane)[i] | axis], axis);
 	
 		switch(axis) {
 			case 0b001:
-				edge_proc(chunk, new int[4] {children[0], children[1], children[4], children[5]}, 0b010);
-				edge_proc(chunk, new int[4] {children[0], children[1], children[2], children[3]}, 0b100);
-				edge_proc(chunk, new int[4] {children[4], children[5], children[6], children[7]}, 0b100);
-				edge_proc(chunk, new int[4] {children[2], children[3], children[6], children[7]}, 0b010);
+				edge_proc(chunk, children[0], children[1], children[4], children[5], 0b010);
+				edge_proc(chunk, children[0], children[1], children[2], children[3], 0b100);
+				edge_proc(chunk, children[4], children[5], children[6], children[7], 0b100);
+				edge_proc(chunk, children[2], children[3], children[6], children[7], 0b010);
 				break;
 			case 0b010:
-				edge_proc(chunk, new int[4] {children[0], children[2], children[4], children[6]}, 0b001);
-				edge_proc(chunk, new int[4] {children[0], children[1], children[2], children[3]}, 0b100);
-				edge_proc(chunk, new int[4] {children[4], children[5], children[6], children[7]}, 0b100);
-				edge_proc(chunk, new int[4] {children[1], children[3], children[5], children[7]}, 0b001);
+				edge_proc(chunk, children[0], children[2], children[4], children[6], 0b001);
+				edge_proc(chunk, children[0], children[1], children[2], children[3], 0b100);
+				edge_proc(chunk, children[4], children[5], children[6], children[7], 0b100);
+				edge_proc(chunk, children[1], children[3], children[5], children[7], 0b001);
 				break;
 			case 0b100:
-				edge_proc(chunk, new int[4] {children[0], children[2], children[4], children[6]}, 0b001);
-				edge_proc(chunk, new int[4] {children[0], children[1], children[4], children[5]}, 0b010);
-				edge_proc(chunk, new int[4] {children[2], children[3], children[6], children[7]}, 0b010);
-				edge_proc(chunk, new int[4] {children[1], children[3], children[5], children[7]}, 0b001);
+				edge_proc(chunk, children[0], children[2], children[4], children[6], 0b001);
+				edge_proc(chunk, children[0], children[1], children[4], children[5], 0b010);
+				edge_proc(chunk, children[2], children[3], children[6], children[7], 0b010);
+				edge_proc(chunk, children[1], children[3], children[5], children[7], 0b001);
 				break;
 		}
 
@@ -209,7 +209,7 @@ void Mesher::face_proc(OctreeChunk *chunk, int t0, int t1, int axis) {
 // Octree edge, dual face, takes four nodes as arguments.
 // Assume a node's location t in bit form is also it's location relative to the other nodes on valid
 // axes. Axis represents the commmon dimension.
-void Mesher::edge_proc(OctreeChunk *chunk, int t[4], int axis) {
+void Mesher::edge_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int axis) {
 	Octree *octree = chunk->get_tree();
 		
 	int num_leaves = 0;
@@ -217,35 +217,29 @@ void Mesher::edge_proc(OctreeChunk *chunk, int t[4], int axis) {
 	int children[8];
 	
 	// Find exterior plane that needs to be connected, with the value at the given axis always 0.
-	int *plane;
+	const int (*plane)[4];
 	switch(axis) {
 		case 0b001:
-			plane = new int[4] {0b000, 0b010, 0b100, 0b110};
+			plane = &plane_z;
 			break;
 		case 0b010:
-			plane = new int[4] {0b000, 0b001, 0b100, 0b101};
+			plane = &plane_y;
 			break;
 		case 0b100:
-			plane = new int[4] {0b000, 0b001, 0b010, 0b011};
+			plane = &plane_x;
 			break;
 	}
 	
 	// Find children to be connected.
-	for (int i=0; i < 4; i++) {
-		if (octree->is_branch(t[i])) {
-			children[i] = octree->get_child(t[i], plane[3 - i]);
-			children[i + 4] = octree->get_child(t[i], plane[3 -i] | axis);
-		} else {
-			children[i] = t[i];
-			children[i + 4] = t[i];
-			num_leaves++;
-		}
-	}
+	get_edge_children(octree, t0, 0, children, *plane, axis, &num_leaves);
+	get_edge_children(octree, t1, 1, children, *plane, axis, &num_leaves);
+	get_edge_children(octree, t2, 2, children, *plane, axis, &num_leaves);
+	get_edge_children(octree, t3, 3, children, *plane, axis, &num_leaves);
 	
 	if (num_leaves < 4) {
 		// Recursively traverse child nodes.
-		edge_proc(chunk, new int[4] {children[0], children[1], children[2], children[3]}, axis);
-		edge_proc(chunk, new int[4] {children[4], children[5], children[6], children[7]}, axis);
+		edge_proc(chunk, children[0], children[1], children[2], children[3], axis);
+		edge_proc(chunk, children[4], children[5], children[6], children[7], axis);
 	
 		// Traverse octree vertices.
 		switch(axis) {
@@ -296,4 +290,15 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t[8]) {
 	} else
 		// Recursively traverse child nodes.
 		vert_proc(chunk, children);
+}
+
+inline void Mesher::get_edge_children(Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves) {
+	if (octree->is_branch(t)) {
+		children[idx]	  = octree->get_child(t, plane[3 - idx]);
+		children[idx + 4] = octree->get_child(t, plane[3 - idx] | axis);
+	} else {
+		children[idx]	  = t;
+		children[idx + 4] = t;
+		(*num_leaves)++;
+	}
 }
