@@ -32,8 +32,6 @@ func init(radius):
 		chunk.init(_chunk_depth, _generator)
 		
 	_mesher = Mesher.new()
-	
-	draw()
 
 func draw():
 	_mesher.begin_tree()
