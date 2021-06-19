@@ -29,4 +29,5 @@ public:
 	void set_density(int loc_code, float volume);
 	Vector3 get_vertex(int loc_code);
 	Array get_bounds(int loc_code);
+	int find_node(Vector3 position);
 };

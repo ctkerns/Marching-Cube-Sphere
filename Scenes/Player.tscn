@@ -52,6 +52,10 @@ far = 10000.0
 [node name="AnimationPlayer" type="AnimationPlayer" parent="PitchRotator/Camera"]
 anims/HeadBob = SubResource( 1 )
 
+[node name="RayCast" type="RayCast" parent="PitchRotator/Camera"]
+transform = Transform( 1, 0, 0, 0, -2.62268e-07, -1, 0, 6, -4.37114e-08, 0, 0, 0 )
+enabled = true
+
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 shape = SubResource( 2 )

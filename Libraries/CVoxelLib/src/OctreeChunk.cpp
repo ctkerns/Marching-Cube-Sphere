@@ -5,6 +5,7 @@
 
 void OctreeChunk::_register_methods() {
 	godot::register_method("init", &OctreeChunk::init);
+	godot::register_method("change_terrain", &OctreeChunk::change_terrain);
 }
 
 void OctreeChunk::_init() {
@@ -94,4 +95,18 @@ void OctreeChunk::generate() {
 					m_tree->delete_node(m_tree->get_child(node, k));
 		}
 	}
+}
+
+void OctreeChunk::change_terrain(Vector3 intersection, float delta) {
+	int node = m_tree->find_node(to_local(intersection));
+	float density = m_tree->get_density(node);
+	density += delta;
+	
+	if (density > 1.0)
+		density = 1.0;
+	
+	if (density < 0.0)
+		density = 0.0;
+
+	m_tree->set_density(node, density);
 }

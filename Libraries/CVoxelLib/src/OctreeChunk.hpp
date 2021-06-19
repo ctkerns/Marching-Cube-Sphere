@@ -30,4 +30,5 @@ public:
 
 	void init(int depth, Generator *generator);
 	Octree *get_tree();
+	void change_terrain(Vector3 intersection, float delta);
 };

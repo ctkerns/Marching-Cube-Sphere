@@ -29,3 +29,6 @@ material_override = ExtResource( 6 )
 [node name="StaticBody" type="StaticBody" parent="."]
 
 [node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
+
+[connection signal="carve_terrain" from="Player" to="." method="carve_terrain"]
+[connection signal="place_terrain" from="Player" to="." method="place_terrain"]

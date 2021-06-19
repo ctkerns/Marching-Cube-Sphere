@@ -63,3 +63,14 @@ func _input(event):
 			dual.hide()
 		else:
 			dual.show()
+			
+func carve_terrain(intersection: Vector3):
+	for chunk in _chunks:
+		chunk.change_terrain(intersection, -0.5)
+	draw()
+
+func place_terrain(intersection: Vector3):
+	for chunk in _chunks:
+		chunk.change_terrain(intersection, 0.5)
+	draw()
+	

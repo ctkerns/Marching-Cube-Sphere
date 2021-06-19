@@ -19,6 +19,10 @@ var _flying = false
 onready var pitch = $PitchRotator
 onready var camera = $PitchRotator/Camera
 onready var camera_animation = $PitchRotator/Camera/AnimationPlayer
+onready var ray_cast = $PitchRotator/Camera/RayCast
+
+signal carve_terrain(intersection)
+signal place_terrain(intersection)
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -41,6 +45,13 @@ func _process(_delta):
 	var look_up = self.get_translation().normalized()
 	var look_forward = look_up.cross(prev_forward.cross(look_up)).normalized()
 	self.look_at(self.get_translation() + look_forward, look_up)
+	
+	# Modify the environment.
+	if ray_cast.is_colliding() and ray_cast.is_enabled():
+		if Input.is_action_just_pressed("left_click"):
+			emit_signal("carve_terrain", ray_cast.get_collision_point())
+		if Input.is_action_just_pressed("right_click"):
+			emit_signal("place_terrain", ray_cast.get_collision_point())
 	
 func _physics_process(delta):
 	var up = self.get_translation().normalized()
