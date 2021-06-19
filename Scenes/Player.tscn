@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Scripts/Player.gd" type="Script" id=1]
+[ext_resource path="res://Assets/crosshair.png" type="Texture" id=2]
 
 [sub_resource type="Animation" id=1]
 resource_name = "HeadBob"
@@ -55,6 +56,22 @@ anims/HeadBob = SubResource( 1 )
 [node name="RayCast" type="RayCast" parent="PitchRotator/Camera"]
 transform = Transform( 1, 0, 0, 0, -2.62268e-07, -1, 0, 6, -4.37114e-08, 0, 0, 0 )
 enabled = true
+
+[node name="CenterContainer" type="CenterContainer" parent="PitchRotator/Camera"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="PitchRotator/Camera/CenterContainer"]
+margin_left = 512.0
+margin_top = 300.0
+margin_right = 512.0
+margin_bottom = 300.0
+texture = ExtResource( 2 )
+expand = true
+stretch_mode = 4
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
