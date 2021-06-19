@@ -127,14 +127,28 @@ Array Octree::get_bounds(int loc_code) {
 }
 
 // Find a node in the tree that contains a position.
-int Octree::find_node(Vector3 position) {
+// This will split the tree until the maximum depth is reached.
+int Octree::find_node(Vector3 position, int depth) {
 	int node = 0b1;
 	Vector3 vert = Vector3(0, 0, 0);
 	float increment = 0.5;
+	int level = 0;
 
-	while(is_branch(node)) {
+	while(level < depth) {
+		// Give new children the same density as the parent.
+		Array volumes;
+		float density = get_density(node);
+		for (int i=0; i < 8; i++)
+			volumes.push_back(density);
+
+		if(!is_branch(node))
+			split(node, volumes);
+
+		// Move up a level.
 		node <<= 3;
+		level++;
 
+		// Determine which child to traverse to.
 		if (position.x >= vert.x) {
 			node |= 4;
 			vert.x += increment;

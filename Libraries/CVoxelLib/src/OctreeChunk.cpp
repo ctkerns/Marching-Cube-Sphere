@@ -98,7 +98,7 @@ void OctreeChunk::generate() {
 }
 
 void OctreeChunk::change_terrain(Vector3 intersection, float delta) {
-	int node = m_tree->find_node(to_local(intersection));
+	int node = m_tree->find_node(to_local(intersection), m_depth);
 	float density = m_tree->get_density(node);
 	density += delta;
 	
