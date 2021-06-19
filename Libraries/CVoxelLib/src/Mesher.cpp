@@ -284,13 +284,11 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t[8]) {
 		
 	if (num_leaves >= 8) {
 		// All nodes surrounding the vertex are leaves so draw the dual volume here.
-		Array v;
-		Array d;
+		Vector3 v[8];
+		float d[8];
 		for (int i=0; i < 8; i++) {
-			Vector3 vert = octree->get_vertex(t[i]);
-			v.push_back(chunk->to_global(vert));
-
-			d.push_back(octree->get_density(t[i]));
+			v[i] = chunk->to_global(octree->get_vertex(t[i]));
+			d[i] = octree->get_density(t[i]);
 		}
 	
 		Geometry::draw_hexahedron_edge(v, m_dual);
