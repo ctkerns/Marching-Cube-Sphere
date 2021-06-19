@@ -25,10 +25,10 @@ private:
 	SurfaceTool *m_surface;
 
 	void cube_proc(OctreeChunk *chunk, int t);
-	void face_proc(OctreeChunk *chunk, int t[2], int axis);
+	void face_proc(OctreeChunk *chunk, int t0, int t1, int axis);
 	void edge_proc(OctreeChunk *chunk, int t[4], int axis);
 	void vert_proc(OctreeChunk *chunk, int t[8]);
-
+	
 public:
 	void static _register_methods();
 	void _init();

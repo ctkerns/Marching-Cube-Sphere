@@ -103,18 +103,18 @@ void Mesher::cube_proc(OctreeChunk *chunk, int t) {
 	}
 	
 	// Traverse octree faces.
-	face_proc(chunk, new int[2] {children[0], children[1]}, 0b001);
-	face_proc(chunk, new int[2] {children[0], children[2]}, 0b010);
-	face_proc(chunk, new int[2] {children[0], children[4]}, 0b100);
-	face_proc(chunk, new int[2] {children[1], children[3]}, 0b010);
-	face_proc(chunk, new int[2] {children[1], children[5]}, 0b100);
-	face_proc(chunk, new int[2] {children[2], children[3]}, 0b001);
-	face_proc(chunk, new int[2] {children[2], children[6]}, 0b100);
-	face_proc(chunk, new int[2] {children[3], children[7]}, 0b100);
-	face_proc(chunk, new int[2] {children[4], children[5]}, 0b001);
-	face_proc(chunk, new int[2] {children[4], children[6]}, 0b010);
-	face_proc(chunk, new int[2] {children[5], children[7]}, 0b010);
-	face_proc(chunk, new int[2] {children[6], children[7]}, 0b001);
+	face_proc(chunk, children[0], children[1], 0b001);
+	face_proc(chunk, children[0], children[2], 0b010);
+	face_proc(chunk, children[0], children[4], 0b100);
+	face_proc(chunk, children[1], children[3], 0b010);
+	face_proc(chunk, children[1], children[5], 0b100);
+	face_proc(chunk, children[2], children[3], 0b001);
+	face_proc(chunk, children[2], children[6], 0b100);
+	face_proc(chunk, children[3], children[7], 0b100);
+	face_proc(chunk, children[4], children[5], 0b001);
+	face_proc(chunk, children[4], children[6], 0b010);
+	face_proc(chunk, children[5], children[7], 0b010);
+	face_proc(chunk, children[6], children[7], 0b001);
 	
 	// Traverse octree edges.
 	edge_proc(chunk, new int[4] {children[0], children[1], children[2], children[3]}, 0b100);
@@ -130,7 +130,7 @@ void Mesher::cube_proc(OctreeChunk *chunk, int t) {
 
 // Octree face, dual edge, takes two nodes as arguments.
 // Assume that t_0 is inferior on given axis and t_1 is superior.
-void Mesher::face_proc(OctreeChunk *chunk, int t[2], int axis) {
+void Mesher::face_proc(OctreeChunk *chunk, int t0, int t1, int axis) {
 	Octree *octree = chunk->get_tree();
 		
 	int num_leaves = 0;
@@ -155,31 +155,31 @@ void Mesher::face_proc(OctreeChunk *chunk, int t[2], int axis) {
 	// the axis.
 
 	// Inferior node.
-	if (octree->is_branch(t[0]))
+	if (octree->is_branch(t0))
 		for (int i=0; i < 4; i++)
-			children[plane[i]] = octree->get_child(t[0], plane[i] | axis);
+			children[plane[i]] = octree->get_child(t0, plane[i] | axis);
 	else {
 		// If node is a leaf, use the node as a stand in for its child.
 		for (int i=0; i < 4; i++)
-			children[plane[i]] = t[0];
+			children[plane[i]] = t0;
 		num_leaves++;
 	}
 		
 	// Superior node.
-	if (octree->is_branch(t[1]))
+	if (octree->is_branch(t1))
 		for (int i=0; i < 4; i++)
-			children[plane[i] | axis] = octree->get_child(t[1], plane[i]);
+			children[plane[i] | axis] = octree->get_child(t1, plane[i]);
 	else {
 		// If node is a leaf, use the node as a stand in for its child.
 		for (int i=0; i < 4; i++)
-			children[plane[i] | axis] = t[1];
+			children[plane[i] | axis] = t1;
 		num_leaves ++;
 	}
 		
 	if (num_leaves < 2) {
 		// Recursively traverse child nodes.
 		for (int i=0; i < 4; i++)
-			face_proc(chunk, new int[2] {children[plane[i]], children[plane[i] | axis]}, axis);
+			face_proc(chunk, children[plane[i]], children[plane[i] | axis], axis);
 	
 		switch(axis) {
 			case 0b001:
