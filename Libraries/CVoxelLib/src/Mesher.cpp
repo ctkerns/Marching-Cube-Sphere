@@ -3,6 +3,9 @@
 #include "Mesher.hpp"
 
 #include "Octree.hpp"
+#include "Material.hpp"
+
+using Material::get_color;
 
 void Mesher::_register_methods() {
 	godot::register_method("begin_tree", &Mesher::begin_tree);
@@ -173,7 +176,7 @@ void Mesher::face_proc(OctreeChunk *chunk, int t0, int t1, int axis) {
 		// If node is a leaf, use the node as a stand in for its child.
 		for (int i=0; i < 4; i++)
 			children[(*plane)[i] | axis] = t1;
-		num_leaves ++;
+		num_leaves++;
 	}
 		
 	if (num_leaves < 2) {
@@ -297,9 +300,20 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t
 			octree->get_density(t6),
 			octree->get_density(t7)
 		};
+
+		Color c[8] = {
+			get_color(octree->get_material(t0)),
+			get_color(octree->get_material(t1)),
+			get_color(octree->get_material(t2)),
+			get_color(octree->get_material(t3)),
+			get_color(octree->get_material(t4)),
+			get_color(octree->get_material(t5)),
+			get_color(octree->get_material(t6)),
+			get_color(octree->get_material(t7))
+		};
 	
 		Geometry::draw_hexahedron_edge(v, m_dual);
-		MarchingCubes::draw_cube(v, d, m_surface);
+		MarchingCubes::draw_cube(v, d, c, m_surface);
 	} else
 		// Recursively traverse child nodes.
 		vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);

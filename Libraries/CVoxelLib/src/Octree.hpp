@@ -7,6 +7,8 @@
 
 #include "Octnode.hpp"
 
+#include "Material.hpp"
+
 using godot::Array;
 using godot::Vector3;
 
@@ -18,7 +20,7 @@ private:
 public:
 	Octree();
 
-	void split(int loc_code, Array);
+	void split(int loc_code, float vol[8], Material::MaterialType mat[8]);
 	void delete_node(int loc_code);
 	bool is_branch(int loc_code);
 
@@ -27,6 +29,8 @@ public:
 	int get_neighbor(int loc_code, int dir);
 	float get_density(int loc_code);
 	void set_density(int loc_code, float volume);
+	Material::MaterialType get_material(int loc_code);
+	void set_material(int loc_code, Material::MaterialType material);
 	Vector3 get_vertex(int loc_code);
 	Array get_bounds(int loc_code);
 	int find_node(Vector3 position, int depth);

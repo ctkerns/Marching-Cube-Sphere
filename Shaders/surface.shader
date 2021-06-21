@@ -15,5 +15,5 @@ void fragment() {
 	if (mag > 0.7)
 		ALBEDO = vec3(0.255,0.459,0.102);
 	else
-		ALBEDO = vec3(0.141,0.109,0.039);
+		ALBEDO = COLOR.xyz;
 }

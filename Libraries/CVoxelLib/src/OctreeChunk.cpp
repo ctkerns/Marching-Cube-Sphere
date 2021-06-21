@@ -3,6 +3,10 @@
 
 #include "OctreeChunk.hpp"
 
+#include "Material.hpp"
+
+using namespace Material;
+
 void OctreeChunk::_register_methods() {
 	godot::register_method("init", &OctreeChunk::init);
 	godot::register_method("change_terrain", &OctreeChunk::change_terrain);
@@ -40,7 +44,8 @@ void OctreeChunk::generate() {
 			// Find the volume for each child before they are created.
 			int node = queue.front();
 			queue.pop();
-			Array volumes;
+			float volumes[8];
+			MaterialType materials[8];
 			for (int k=0; k < 8; k++) {
 				int child = m_tree->get_child(node, k);
 				Vector3 vert = m_tree->get_vertex(child);
@@ -48,11 +53,12 @@ void OctreeChunk::generate() {
 				// This needs to change if the planet is going to move.
 				vert = to_global(vert);
 
-				volumes.push_back(m_generator->sample(vert.x, vert.y, vert.z));
+				volumes[k] = m_generator->sample(vert.x, vert.y, vert.z);
+				materials[k] = MaterialType(int(volumes[k]*1000.0)%3);
 			}
 			
 			// Split each node in the queue, and add the nodes to the queue.
-			m_tree->split(node, volumes);
+			m_tree->split(node, volumes, materials);
 
 			for (int k=0; k < 8; k++)
 				queue.push(m_tree->get_child(node, k));
