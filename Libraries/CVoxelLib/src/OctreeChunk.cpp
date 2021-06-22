@@ -54,7 +54,7 @@ void OctreeChunk::generate() {
 				vert = to_global(vert);
 
 				volumes[k] = m_generator->sample(vert.x, vert.y, vert.z);
-				materials[k] = MaterialType(int(volumes[k]*1000.0)%3);
+				materials[k] = MaterialType(m_generator->sample_material(vert.x, vert.y, vert.z));
 			}
 			
 			// Split each node in the queue, and add the nodes to the queue.

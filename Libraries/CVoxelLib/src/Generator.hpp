@@ -12,6 +12,7 @@ class Generator: public Object {
 
 private:
 	OpenSimplexNoise *m_noise;
+	OpenSimplexNoise *m_material_noise;
 	float m_radius;
 
 public:
@@ -20,4 +21,5 @@ public:
 
 	void set_radius(float radius);
 	float sample(float x, float y, float z);
+	int sample_material(float x, float y, float z);
 };
