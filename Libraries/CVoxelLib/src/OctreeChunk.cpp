@@ -46,6 +46,7 @@ void OctreeChunk::generate() {
 			queue.pop();
 			float volumes[8];
 			MaterialType materials[8];
+			CoveringType coverings[8];
 			for (int k=0; k < 8; k++) {
 				int child = m_tree->get_child(node, k);
 				Vector3 vert = m_tree->get_vertex(child);
@@ -55,10 +56,11 @@ void OctreeChunk::generate() {
 
 				volumes[k] = m_generator->sample(vert.x, vert.y, vert.z);
 				materials[k] = MaterialType(m_generator->sample_material(vert.x, vert.y, vert.z));
+				coverings[k] = CoveringType(m_generator->sample_covering(vert.x, vert.y, vert.z));
 			}
 			
 			// Split each node in the queue, and add the nodes to the queue.
-			m_tree->split(node, volumes, materials);
+			m_tree->split(node, volumes, materials, coverings);
 
 			for (int k=0; k < 8; k++)
 				queue.push(m_tree->get_child(node, k));

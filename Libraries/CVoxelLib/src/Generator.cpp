@@ -50,8 +50,15 @@ int Generator::sample_material(float x, float y, float z) {
 
 	if (scaled_dist + noise_value < 1.0)
 		return stone;
-	if (noise_value > 0.7)
+	if (noise_value > 0.6)
 		return sand;
 	return dirt;
+}
 
+int Generator::sample_covering(float x, float y, float z) {
+	if (z > m_radius)
+		return snow;
+	if (Vector3(x, y, z).length() > m_radius/1.5)
+		return snow;
+	return grass;
 }

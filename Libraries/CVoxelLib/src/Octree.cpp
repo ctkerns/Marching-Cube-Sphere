@@ -10,14 +10,14 @@ Octree::Octree() {
 }
 
 // Subdivides this node by creating eight children.
-void Octree::split(int loc_code, float vol[8], MaterialType mat[8]) {
+void Octree::split(int loc_code, float vol[8], MaterialType mat[8], CoveringType cov[8]) {
 	if (get_depth(loc_code) > 20)
 		return;
 		
 	int prefix = loc_code << 3;
 	
 	for(int i=0; i < 8; i++) {
-		Octnode *node = new Octnode(vol[i], mat[i]);
+		Octnode *node = new Octnode(vol[i], mat[i], cov[i]);
 		m_nodes[prefix | i] = node;
 	}
 }
@@ -66,6 +66,14 @@ MaterialType Octree::get_material(int loc_code) {
 
 void Octree::set_material(int loc_code, MaterialType material) {
 	m_nodes[loc_code]->set_material(material);
+}
+
+CoveringType Octree::get_covering(int loc_code) {
+	return m_nodes[loc_code]->get_covering();
+}
+
+void Octree::set_covering(int loc_code, CoveringType covering) {
+	m_nodes[loc_code]->set_covering(covering);
 }
 
 // Returns the position of the center of this node relative to the octree.
@@ -144,18 +152,21 @@ int Octree::find_node(Vector3 position, int depth) {
 	int level = 0;
 
 	while(level < depth) {
-		// Give new children the same density and material as the parent.
+		// Give new children the same properties as the parent.
 		float volumes[8];
 		float density = get_density(node);
 		MaterialType materials[8];
 		MaterialType material = get_material(node);
+		CoveringType coverings[8];
+		CoveringType covering = get_covering(node);
 		for (int i=0; i < 8; i++) {
 			volumes[i] = density;
 			materials[i] = material;
+			coverings[i] = covering;
 		}
 
 		if(!is_branch(node))
-			split(node, volumes, materials);
+			split(node, volumes, materials, coverings);
 
 		// Move up a level.
 		node <<= 3;

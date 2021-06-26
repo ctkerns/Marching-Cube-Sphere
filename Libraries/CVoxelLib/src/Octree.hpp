@@ -20,7 +20,7 @@ private:
 public:
 	Octree();
 
-	void split(int loc_code, float vol[8], Material::MaterialType mat[8]);
+	void split(int loc_code, float vol[8], Material::MaterialType mat[8], Material::CoveringType cov[8]);
 	void delete_node(int loc_code);
 	bool is_branch(int loc_code);
 
@@ -31,6 +31,8 @@ public:
 	void set_density(int loc_code, float volume);
 	Material::MaterialType get_material(int loc_code);
 	void set_material(int loc_code, Material::MaterialType material);
+	Material::CoveringType get_covering(int loc_code);
+	void set_covering(int loc_code, Material::CoveringType covering);
 	Vector3 get_vertex(int loc_code);
 	Array get_bounds(int loc_code);
 	int find_node(Vector3 position, int depth);

@@ -5,7 +5,7 @@
 #include "Octree.hpp"
 #include "Material.hpp"
 
-using Material::get_color;
+using Material::get_material_ids;
 
 void Mesher::_register_methods() {
 	godot::register_method("begin_tree", &Mesher::begin_tree);
@@ -301,19 +301,30 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t
 			octree->get_density(t7)
 		};
 
-		Color c[8] = {
-			get_color(octree->get_material(t0)),
-			get_color(octree->get_material(t1)),
-			get_color(octree->get_material(t2)),
-			get_color(octree->get_material(t3)),
-			get_color(octree->get_material(t4)),
-			get_color(octree->get_material(t5)),
-			get_color(octree->get_material(t6)),
-			get_color(octree->get_material(t7))
+		Material::MaterialType mat[8] = {
+			octree->get_material(t0),
+			octree->get_material(t1),
+			octree->get_material(t2),
+			octree->get_material(t3),
+			octree->get_material(t4),
+			octree->get_material(t5),
+			octree->get_material(t6),
+			octree->get_material(t7)
 		};
-	
+
+		Material::CoveringType cov[8] = {
+			octree->get_covering(t0),
+			octree->get_covering(t1),
+			octree->get_covering(t2),
+			octree->get_covering(t3),
+			octree->get_covering(t4),
+			octree->get_covering(t5),
+			octree->get_covering(t6),
+			octree->get_covering(t7),
+		};
+
 		Geometry::draw_hexahedron_edge(v, m_dual);
-		MarchingCubes::draw_cube(v, d, c, m_surface);
+		MarchingCubes::draw_cube(v, d, mat, cov, m_surface);
 	} else
 		// Recursively traverse child nodes.
 		vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);
