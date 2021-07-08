@@ -4,20 +4,20 @@ using namespace Material;
 
 Octree::Octree() {
 	// Create octree.
-	Octnode *head = new Octnode(0.5);
+	Octnode *head = new Octnode(0.5, 0.0);
 
 	m_nodes[1] = head;
 }
 
 // Subdivides this node by creating eight children.
-void Octree::split(int loc_code, float vol[8], MaterialType mat[8], CoveringType cov[8]) {
+void Octree::split(int loc_code, float vol[8], float fld[8], MaterialType mat[8], CoveringType cov[8]) {
 	if (get_depth(loc_code) > 20)
 		return;
 		
 	int prefix = loc_code << 3;
 	
 	for(int i=0; i < 8; i++) {
-		Octnode *node = new Octnode(vol[i], mat[i], cov[i]);
+		Octnode *node = new Octnode(vol[i], fld[i], mat[i], cov[i]);
 		m_nodes[prefix | i] = node;
 	}
 }
@@ -58,6 +58,16 @@ float Octree::get_density(int loc_code) {
 void Octree::set_density(int loc_code, float volume) {
 	Octnode *node = m_nodes[loc_code];
 	return node->set_volume(volume);
+}
+
+float Octree::get_fluid(int loc_code) {
+	Octnode *node = m_nodes[loc_code];
+	return node->get_fluid();
+}
+
+void Octree::set_fluid(int loc_code, float fluid) {
+	Octnode *node = m_nodes[loc_code];
+	return node->set_fluid(fluid);
 }
 
 MaterialType Octree::get_material(int loc_code) {
@@ -155,18 +165,21 @@ int Octree::find_node(Vector3 position, int depth) {
 		// Give new children the same properties as the parent.
 		float volumes[8];
 		float density = get_density(node);
+		float fluids[8];
+		float fluid = get_fluid(node);
 		MaterialType materials[8];
 		MaterialType material = get_material(node);
 		CoveringType coverings[8];
 		CoveringType covering = get_covering(node);
 		for (int i=0; i < 8; i++) {
 			volumes[i] = density;
+			fluids[i] = fluid;
 			materials[i] = material;
 			coverings[i] = covering;
 		}
 
 		if(!is_branch(node))
-			split(node, volumes, materials, coverings);
+			split(node, volumes, fluids, materials, coverings);
 
 		// Move up a level.
 		node <<= 3;

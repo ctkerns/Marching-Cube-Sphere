@@ -32,7 +32,9 @@ float Generator::sample(float x, float y, float z) {
 
 	float magnitude = Vector3(x, y, z).length();
 
-	vol = magnitude/-m_radius + 1.0 + vol/1.0 + (float(rand())/RAND_MAX*2.0 - 1.0)/48.0;
+	// Add sphere shape and randomness.
+	vol += magnitude/-m_radius + 1.0;
+	vol += (float(rand())/RAND_MAX*2.0 - 1.0)/48.0;
 
 	if (vol > 1.0)
 		vol = 1.0;
@@ -40,6 +42,16 @@ float Generator::sample(float x, float y, float z) {
 		vol = 0.0;
 
 	return vol;
+}
+
+float Generator::sample_fluid(float x, float y, float z) {
+	float dist = Vector3(x, y, z).length();
+	float scaled_dist = dist/m_radius;
+
+	if (scaled_dist > 0.7)
+		return 0.0;
+	else
+		return 1.0;
 }
 
 int Generator::sample_material(float x, float y, float z) {
@@ -50,7 +62,7 @@ int Generator::sample_material(float x, float y, float z) {
 
 	if (scaled_dist + noise_value < 1.0)
 		return stone;
-	if (noise_value > 0.6)
+	if (noise_value < 0.6)
 		return sand;
 	return dirt;
 }

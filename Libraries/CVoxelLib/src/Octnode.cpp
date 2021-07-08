@@ -2,8 +2,8 @@
 
 using namespace Material;
 
-Octnode::Octnode(float volume, MaterialType material, CoveringType covering)
-: m_volume(volume), m_material(material), m_covering(covering) {
+Octnode::Octnode(float volume, float fluid, MaterialType material, CoveringType covering)
+: m_volume(volume), m_fluid(fluid), m_material(material), m_covering(covering) {
 
 }
 
@@ -13,6 +13,14 @@ float Octnode::get_volume() {
 
 void Octnode::set_volume(float volume) {
 	m_volume = volume;
+}
+
+float Octnode::get_fluid() {
+	return m_fluid;
+}
+
+void Octnode::set_fluid(float fluid) {
+	m_fluid = fluid;
 }
 
 MaterialType Octnode::get_material() {

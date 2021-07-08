@@ -21,6 +21,7 @@ public:
 
 	void set_radius(float radius);
 	float sample(float x, float y, float z);
+	float sample_fluid(float x, float y, float z);
 	int sample_material(float x, float y, float z);
 	int sample_covering(float x, float y, float z);
 };
