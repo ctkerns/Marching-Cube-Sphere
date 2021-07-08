@@ -11,9 +11,11 @@ void Mesher::_register_methods() {
 	godot::register_method("begin_tree", &Mesher::begin_tree);
 	godot::register_method("begin_dual", &Mesher::begin_dual);
 	godot::register_method("begin_surface", &Mesher::begin_surface);
+	godot::register_method("begin_fluid", &Mesher::begin_fluid);
 	godot::register_method("end_tree", &Mesher::end_tree);
 	godot::register_method("end_dual", &Mesher::end_dual);
 	godot::register_method("end_surface", &Mesher::end_surface);
+	godot::register_method("end_fluid", &Mesher::end_fluid);
 	godot::register_method("draw_tree", &Mesher::draw_tree);
 	godot::register_method("draw", &Mesher::draw);
 }
@@ -23,6 +25,7 @@ void Mesher::_init() {
 	m_tree = SurfaceTool::_new();
 	m_dual = SurfaceTool::_new();
 	m_surface = SurfaceTool::_new();
+	m_fluid = SurfaceTool::_new();
 }
 
 void Mesher::begin_tree() {
@@ -38,6 +41,11 @@ void Mesher::begin_surface() {
 	m_surface->add_smooth_group(true);
 }
 
+void Mesher::begin_fluid() {
+	m_fluid->begin(Mesh::PRIMITIVE_TRIANGLES);
+	m_fluid->add_smooth_group(true);	
+}
+
 Ref<ArrayMesh> Mesher::end_tree() {
 	return m_tree->commit();
 }
@@ -47,11 +55,14 @@ Ref<ArrayMesh> Mesher::end_dual() {
 }
 
 Ref<ArrayMesh> Mesher::end_surface() {
-	//m_surface->index();
 	m_surface->generate_normals();
 	return m_surface->commit();
 }
 
+Ref<ArrayMesh> Mesher::end_fluid() {
+	m_fluid->generate_normals();
+	return m_fluid->commit();
+}
 
 void Mesher::draw_tree(OctreeChunk *chunk) {
 	Octree *octree = chunk->get_tree();
@@ -301,6 +312,17 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t
 			octree->get_density(t7)
 		};
 
+		float f[8] = {
+			octree->get_fluid(t0),
+			octree->get_fluid(t1),
+			octree->get_fluid(t2),
+			octree->get_fluid(t3),
+			octree->get_fluid(t4),
+			octree->get_fluid(t5),
+			octree->get_fluid(t6),
+			octree->get_fluid(t7)
+		};
+
 		Material::MaterialType mat[8] = {
 			octree->get_material(t0),
 			octree->get_material(t1),
@@ -325,6 +347,7 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t
 
 		Geometry::draw_hexahedron_edge(v, m_dual);
 		MarchingCubes::draw_cube(v, d, mat, cov, m_surface);
+		MarchingCubes::draw_fluid(v, f, m_fluid);
 	} else
 		// Recursively traverse child nodes.
 		vert_proc(chunk, children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]);

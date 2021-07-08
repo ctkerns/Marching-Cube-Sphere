@@ -33,7 +33,7 @@ float Generator::sample(float x, float y, float z) {
 	float magnitude = Vector3(x, y, z).length();
 
 	// Add sphere shape and randomness.
-	vol += magnitude/-m_radius + 1.0;
+	vol += 1.0 - magnitude/m_radius;
 	vol += (float(rand())/RAND_MAX*2.0 - 1.0)/48.0;
 
 	if (vol > 1.0)
@@ -45,13 +45,15 @@ float Generator::sample(float x, float y, float z) {
 }
 
 float Generator::sample_fluid(float x, float y, float z) {
-	float dist = Vector3(x, y, z).length();
-	float scaled_dist = dist/m_radius;
+	float magnitude = Vector3(x, y, z).length();
+	float vol = 1.0 - magnitude/m_radius;
 
-	if (scaled_dist > 0.7)
-		return 0.0;
-	else
-		return 1.0;
+	if (vol > 1.0)
+		vol = 1.0;
+	else if (vol < 0.0)
+		vol = 0.0;
+
+	return vol;
 }
 
 int Generator::sample_material(float x, float y, float z) {

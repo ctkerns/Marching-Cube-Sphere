@@ -23,6 +23,7 @@ private:
 	SurfaceTool *m_tree;
 	SurfaceTool *m_dual;
 	SurfaceTool *m_surface;
+	SurfaceTool *m_fluid;
 
 	void cube_proc(OctreeChunk *chunk, int t);
 	void face_proc(OctreeChunk *chunk, int t0, int t1, int axis);
@@ -43,9 +44,11 @@ public:
 	void begin_tree();
 	void begin_dual();
 	void begin_surface();
+	void begin_fluid();
 	Ref<ArrayMesh> end_tree();
 	Ref<ArrayMesh> end_dual();
 	Ref<ArrayMesh> end_surface();
+	Ref<ArrayMesh> end_fluid();
 
 	void draw_tree(OctreeChunk *chunk);
 	void draw(OctreeChunk *chunk);

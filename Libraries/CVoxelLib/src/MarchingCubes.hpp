@@ -25,6 +25,7 @@ private:
 		Material::MaterialType *material,
 		Material::CoveringType *covering
 	);
+	static Vector3 find_simple_vert(int edge_index, Vector3 v[8], float d[8]);
 
 public:
 	static void draw_cube(
@@ -34,4 +35,5 @@ public:
 		Material::CoveringType cov[8],
 		SurfaceTool *st
 	);
+	static void draw_fluid(Vector3 v[8], float d[8], SurfaceTool *st);
 };

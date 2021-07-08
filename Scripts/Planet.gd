@@ -14,6 +14,7 @@ var _generator
 onready var borders = get_node("Borders")
 onready var dual = get_node("Dual")
 onready var surface = get_node("Surface")
+onready var fluid = get_node("Fluid")
 onready var collision_shape = get_node("StaticBody/CollisionShape")
 onready var player = get_node("Player")
 
@@ -26,7 +27,7 @@ func init(radius):
 	_generator.set_radius(_radius)
 
 	# Set the players position so they don't get stuck.
-	player.translation.y =  _radius
+	player.translation.y = _radius
 	
 	for chunk in _chunks:
 		chunk.init(_chunk_depth, _generator)
@@ -37,6 +38,7 @@ func draw():
 	_mesher.begin_tree()
 	_mesher.begin_dual()
 	_mesher.begin_surface()
+	_mesher.begin_fluid()
 
 	# Create vertex data.
 	for chunk in _chunks:
@@ -46,6 +48,7 @@ func draw():
 	borders.mesh = _mesher.end_tree()
 	dual.mesh = _mesher.end_dual()
 	surface.mesh = _mesher.end_surface()
+	fluid.mesh = _mesher.end_fluid()
 
 	collision_shape.set_shape(surface.mesh.create_trimesh_shape())
 

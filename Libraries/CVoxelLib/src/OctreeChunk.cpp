@@ -81,13 +81,26 @@ void OctreeChunk::generate() {
 
 			// Check if the children are homogenous.
 			bool homogenous = true;
-			float first_child = m_tree->get_density(m_tree->get_child(node, 0)) >= threshold;
+			bool first_child = m_tree->get_density(m_tree->get_child(node, 0)) >= threshold;
 
 			for (int k=1; k < 8; k++) {
-				float child = m_tree->get_density(m_tree->get_child(node, k)) >= threshold;
+				bool child = m_tree->get_density(m_tree->get_child(node, k)) >= threshold;
 				if (child != first_child) {
 					homogenous = false;
 					break;
+				}
+			}
+
+			// Check if the children have homogenous fluidity.
+			if (homogenous && first_child == 0) {
+				bool first_fluid = m_tree->get_fluid(m_tree->get_child(node, 0)) >= threshold;
+
+				for (int k=1; k < 8; k++) {
+					bool child = m_tree->get_fluid(m_tree->get_child(node, k)) >= threshold;
+					if (child != first_fluid) {
+						homogenous = false;
+						break;
+					}
 				}
 			}
 
