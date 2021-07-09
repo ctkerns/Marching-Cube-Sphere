@@ -15,7 +15,7 @@ onready var borders = get_node("Borders")
 onready var dual = get_node("Dual")
 onready var surface = get_node("Surface")
 onready var fluid = get_node("Fluid")
-onready var collision_shape = get_node("StaticBody/CollisionShape")
+onready var surface_shape = get_node("SurfaceBody/CollisionShape")
 onready var player = get_node("Player")
 
 func _ready():
@@ -50,7 +50,8 @@ func draw():
 	surface.mesh = _mesher.end_surface()
 	fluid.mesh = _mesher.end_fluid()
 
-	collision_shape.set_shape(surface.mesh.create_trimesh_shape())
+	# Create shapes for physics.
+	surface_shape.set_shape(surface.mesh.create_trimesh_shape())
 
 func _process(_delta):
 	pass#draw()
@@ -76,4 +77,3 @@ func place_terrain(intersection: Vector3):
 	for chunk in _chunks:
 		chunk.change_terrain(intersection, 0.5)
 	draw()
-	

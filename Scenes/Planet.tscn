@@ -31,9 +31,9 @@ material_override = ExtResource( 6 )
 material_override = ExtResource( 7 )
 cast_shadow = 0
 
-[node name="StaticBody" type="StaticBody" parent="."]
+[node name="SurfaceBody" type="StaticBody" parent="."]
 
-[node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
+[node name="CollisionShape" type="CollisionShape" parent="SurfaceBody"]
 
 [connection signal="carve_terrain" from="Player" to="." method="carve_terrain"]
 [connection signal="place_terrain" from="Player" to="." method="place_terrain"]
