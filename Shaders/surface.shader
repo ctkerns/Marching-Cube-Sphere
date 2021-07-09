@@ -40,11 +40,21 @@ const float PI = 3.1415926536f;
 
 void light() {
 	// Lighting.
+	// Cel shading modified from https://godotshaders.com/shader/flexible-toon-shader/
 	float NdotL = dot(NORMAL, LIGHT);
-	float cuts = 8.0;
-	float diffuse_stepped = clamp(NdotL + mod(1.0f - NdotL, 1.0/cuts), 0.0f, 1.0f);
+	float attenuation = ATTENUATION.x;
 
-	vec3 diffuse = ALBEDO.rgb * LIGHT_COLOR/PI;
+	// Split the attenuation.
+	if (attenuation < 0.1)
+		attenuation = 0.0;
+	else
+		attenuation = 1.0;
+
+	float diffuse_amount = NdotL + (attenuation - 1.0);
+	float cuts = 8.0;
+	float diffuse_stepped = clamp(diffuse_amount + mod(1.0f - diffuse_amount, 1.0/cuts), 0.0f, 1.0f);
+
+	vec3 diffuse = ALBEDO.rgb*LIGHT_COLOR/PI;
 	diffuse *= diffuse_stepped;
 	DIFFUSE_LIGHT = max(DIFFUSE_LIGHT, diffuse);
 }
