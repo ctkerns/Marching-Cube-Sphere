@@ -3,6 +3,7 @@ extends KinematicBody
 var _mouse_sensitivity = 0.1
 var _velocity = Vector3()
 var _grounded = false
+var _swimming = false
 var _friction = 0.35 # Grass coefficient of friction.
 var _gravity = 9.8 # Earth gravitational acceleration.
 var _jump = 5.0
@@ -23,6 +24,7 @@ onready var ray_cast = $PitchRotator/Camera/RayCast
 
 signal carve_terrain(intersection)
 signal place_terrain(intersection)
+signal underwater(point, caller)
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -53,57 +55,96 @@ func _process(_delta):
 		if Input.is_action_just_pressed("right_click"):
 			emit_signal("place_terrain", ray_cast.get_collision_point())
 	
-func _physics_process(delta):
-	var up = self.get_translation().normalized()
-	var direction = Vector3()
+	# Check if underwater.
+	emit_signal("underwater", self.get_translation(), self)
+
+# Find the player's intended direction.
+func get_direction(use_vertical):
 	var forward = self.get_global_transform().basis
-	
-	var jump = _jump
-	if _flying:
-		jump *= 4.0
-	
-	# Find the player's intended direction.
-	if _grounded or _flying:
-		if Input.is_action_pressed("move_forward"):
-			direction -= forward.z
-		if Input.is_action_pressed("move_backward"):
-			direction += forward.z
-		if Input.is_action_pressed("move_left"):
-			direction -= forward.x
-		if Input.is_action_pressed("move_right"):
-			direction += forward.x
+	var direction = Vector3()
+
+	if Input.is_action_pressed("move_forward"):
+		direction -= forward.z
+	if Input.is_action_pressed("move_backward"):
+		direction += forward.z
+	if Input.is_action_pressed("move_left"):
+		direction -= forward.x
+	if Input.is_action_pressed("move_right"):
+		direction += forward.x
+	if (use_vertical):
 		if Input.is_action_pressed("move_up"):
-			up = self.get_translation().normalized()
-			_velocity += up*jump
-		if Input.is_action_pressed("move_down") and _flying:
-			up = self.get_translation().normalized()
-			_velocity -= up*jump
+			direction += forward.y
+		if Input.is_action_pressed("move_down"):
+			direction -= forward.y
+
+	return direction.normalized()
+
+func move_in_direction(delta, direction, speed, acceleration):
+	var movement = direction*speed;
+	_velocity = _velocity.linear_interpolate(movement, acceleration*delta)
+
+# A singular change in velocity.
+func jump(jump):
+	var up = self.get_translation().normalized()
+
+	if Input.is_action_just_pressed("move_up"):
+		up = self.get_translation().normalized()
+		_velocity += up*jump
+	if Input.is_action_just_pressed("move_down") and _flying:
+		up = self.get_translation().normalized()
+		_velocity -= up*jump
+
+func friction(delta, coeffF):
+	_velocity = _velocity.linear_interpolate(-_velocity.normalized(), coeffF*_gravity*delta)
+
+func gravity(delta, G):
+	var up = self.get_translation().normalized()
+	_velocity -= up*G*delta
+
+func walk(delta):
+	# Walk and jump.
+	var direction = get_direction(false)
+	var mult = 1.0
+	if Input.is_action_pressed("sprint"):
+		mult *= 1.618
+	move_in_direction(delta, direction, _speed*mult, _acceleration*mult)
+	jump(_jump)
+
+	# Play walk animation.
+	camera_animation.playback_speed = _stride_frequency*mult
+	if direction != Vector3():
+		camera_animation.play("HeadBob")
+	# Apply friction when not walking.
+	else:
+		friction(delta, _friction)
+
+func fly(delta):
+	var direction = get_direction(true)
+	var mult = 4.0
+	if Input.is_action_pressed("sprint"):
+		mult *= 1.618
+	move_in_direction(delta, direction, _speed*mult, _acceleration*mult)
+
+func swim(delta):
+	var direction = get_direction(true)
+	var mult = 1.0
+	if Input.is_action_pressed("sprint"):
+		mult *= 1.618
+	move_in_direction(delta, direction, _speed*mult, _acceleration*mult)
 	
-		# Walk or run.
-		var speed = _speed
-		var acceleration = _acceleration
-		var frequency = _stride_frequency
-		if Input.is_action_pressed("sprint"):
-			speed *= 1.618
-			acceleration *= 1.618
-			frequency *= 1.618
+	# Float.
+	gravity(delta, -9.8)
 
-		# Fast flying.
-		if _flying:
-			acceleration *= 4.0
-			speed *= 4.0
-
-		direction = direction.normalized()*speed
-		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
-
-		# Play walk animation.
-		camera_animation.playback_speed = frequency
-		if not _flying and direction != Vector3():
-			camera_animation.play("HeadBob")
-	
-	# Do the gravity.
-	if not _grounded and not _flying:
-		_velocity -= up*_gravity*delta
+func _physics_process(delta):
+	# Player movement.
+	if _flying:
+		fly(delta)
+	elif _swimming:
+		swim(delta)
+	elif _grounded:
+		walk(delta)
+	else:
+		gravity(delta, _gravity)
 	
 	# Collide.
 	var collision = move_and_collide(_velocity*delta)
@@ -112,10 +153,6 @@ func _physics_process(delta):
 		var normal = _velocity.project(-collision.normal)
 		_velocity -= normal
 		_grounded = true
-
-		# Friction. Only calculate while walking.
-		if direction == Vector3():
-			_velocity = _velocity.linear_interpolate(-_velocity.normalized(), _friction*_gravity*delta)
 
 func _input(event):
 	# Rotate the camera.
@@ -126,3 +163,6 @@ func _input(event):
 		var clamped_rotation = pitch.rotation_degrees
 		clamped_rotation.x = clamp(clamped_rotation.x, -90, 90)
 		pitch.rotation_degrees = clamped_rotation
+		
+func underwater(underwater):
+	_swimming = underwater

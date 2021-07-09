@@ -10,6 +10,7 @@ using namespace Material;
 void OctreeChunk::_register_methods() {
 	godot::register_method("init", &OctreeChunk::init);
 	godot::register_method("change_terrain", &OctreeChunk::change_terrain);
+	godot::register_method("is_underwater", &OctreeChunk::is_underwater);
 }
 
 void OctreeChunk::_init() {
@@ -132,4 +133,9 @@ void OctreeChunk::change_terrain(Vector3 intersection, float delta) {
 		density = 0.0;
 
 	m_tree->set_density(node, density);
+}
+
+bool OctreeChunk::is_underwater(Vector3 point) {
+	int node = m_tree->find_node(to_local(point));
+	return m_tree->get_fluid(node) > 0.5;
 }

@@ -37,3 +37,4 @@ cast_shadow = 0
 
 [connection signal="carve_terrain" from="Player" to="." method="carve_terrain"]
 [connection signal="place_terrain" from="Player" to="." method="place_terrain"]
+[connection signal="underwater" from="Player" to="." method="_underwater"]

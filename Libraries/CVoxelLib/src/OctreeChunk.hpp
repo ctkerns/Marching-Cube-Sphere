@@ -31,4 +31,5 @@ public:
 	void init(int depth, Generator *generator);
 	Octree *get_tree();
 	void change_terrain(Vector3 intersection, float delta);
+	bool is_underwater(Vector3 point);
 };

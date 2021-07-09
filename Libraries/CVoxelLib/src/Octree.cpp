@@ -154,6 +154,43 @@ Array Octree::get_bounds(int loc_code) {
 }
 
 // Find a node in the tree that contains a position.
+int Octree::find_node(Vector3 position) {
+	int node = 0b1;
+	Vector3 vert = Vector3(0, 0, 0);
+	float increment = 0.5;
+	int level = 0;
+
+	while(is_branch(node)) {
+		// Move up a level.
+		node <<= 3;
+		level++;
+
+		// Determine which child to traverse to.
+		if (position.x >= vert.x) {
+			node |= 4;
+			vert.x += increment;
+		} else
+			vert.x -= increment;
+
+		if (position.y >= vert.y) {
+			node |= 2;
+			vert.y += increment;
+		} else
+			vert.y -= increment;
+
+		if (position.z >= vert.z) {
+			node |= 1;
+			vert.z += increment;
+		} else
+			vert.z -= increment;
+
+		increment /= 2;
+	}
+
+	return node;
+}
+
+// Find a node in the tree that contains a position.
 // This will split the tree until the maximum depth is reached.
 int Octree::find_node(Vector3 position, int depth) {
 	int node = 0b1;

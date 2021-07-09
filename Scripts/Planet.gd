@@ -77,3 +77,11 @@ func place_terrain(intersection: Vector3):
 	for chunk in _chunks:
 		chunk.change_terrain(intersection, 0.5)
 	draw()
+	
+func _underwater(point: Vector3, caller):
+	var underwater = false
+	for chunk in _chunks:
+		if chunk.is_underwater(point):
+			underwater = true
+	
+	caller.underwater(underwater)
