@@ -6,10 +6,7 @@
 [ext_resource path="res://Scenes/Chunk.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Materials/dual_outline.tres" type="Material" id=5]
 [ext_resource path="res://Materials/surface.tres" type="Material" id=6]
-
-[sub_resource type="SpatialMaterial" id=1]
-flags_transparent = true
-albedo_color = Color( 0.0196078, 0.0862745, 0.611765, 0.901961 )
+[ext_resource path="res://Materials/fluid.tres" type="Material" id=7]
 
 [node name="Planet" type="Spatial"]
 script = ExtResource( 1 )
@@ -31,7 +28,8 @@ material_override = ExtResource( 5 )
 material_override = ExtResource( 6 )
 
 [node name="Fluid" type="MeshInstance" parent="."]
-material_override = SubResource( 1 )
+material_override = ExtResource( 7 )
+cast_shadow = 0
 
 [node name="StaticBody" type="StaticBody" parent="."]
 

@@ -51,7 +51,7 @@ void light() {
 		attenuation = 1.0;
 
 	float diffuse_amount = NdotL + (attenuation - 1.0);
-	float cuts = 8.0;
+	float cuts = 6.0;
 	float diffuse_stepped = clamp(diffuse_amount + mod(1.0f - diffuse_amount, 1.0/cuts), 0.0f, 1.0f);
 
 	vec3 diffuse = ALBEDO.rgb*LIGHT_COLOR/PI;
