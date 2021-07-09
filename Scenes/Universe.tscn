@@ -17,3 +17,5 @@ environment = SubResource( 1 )
 [node name="Sun" type="DirectionalLight" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
 shadow_enabled = true
+directional_shadow_blend_splits = true
+directional_shadow_max_distance = 8192.0
