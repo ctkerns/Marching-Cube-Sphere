@@ -97,7 +97,7 @@ func _physics_process(delta):
 		_velocity = _velocity.linear_interpolate(direction, acceleration*delta)
 
 		# Play walk animation.
-		camera_animation.playback_speed = _stride_frequency
+		camera_animation.playback_speed = frequency
 		if not _flying and direction != Vector3():
 			camera_animation.play("HeadBob")
 	
