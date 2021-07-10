@@ -30,7 +30,7 @@ void fragment() {
 	mag = (mag + 1.0)/2.0;
 	
 	// Decide whether this is the top of the terrain or not.
-	if (mag > 0.7 || uv.y > 1.0 - epsilon)
+	if (mag > 0.7 && uv.y < 1.0)
 		ALBEDO = covering_color;
 	else
 		ALBEDO = material_color;

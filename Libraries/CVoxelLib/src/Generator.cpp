@@ -70,9 +70,15 @@ int Generator::sample_material(float x, float y, float z) {
 }
 
 int Generator::sample_covering(float x, float y, float z) {
+	float magnitude = Vector3(x, y, z).length();
+
+	// Remove covering if this should be underwater.
+	if (1.0 - magnitude/m_radius > 0.5)
+		return none;
+	
 	if (z > m_radius)
 		return snow;
-	if (Vector3(x, y, z).length() > m_radius/1.5)
+	if (magnitude > m_radius/1.5)
 		return snow;
 	return grass;
 }
