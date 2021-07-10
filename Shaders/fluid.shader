@@ -2,7 +2,6 @@ shader_type spatial;
 
 void fragment() {
 	ALBEDO = vec3(0.03, 0.18, 0.25);
-	ALPHA = 0.9;
 }
 
 const float PI = 3.1415926536f;
@@ -41,8 +40,9 @@ void light() {
 	// Rim lighting.
 	float NdotV = dot(NORMAL, VIEW);
 	float rim_width = 8.0f;
-	float rim_light = pow(1.0f - NdotV, rim_width);
+	float fresnel = pow(1.0f - NdotV, rim_width);
 	vec4 rim_color = vec4(1.0f);
-	rim_light = step(0.5f, rim_light);
+	float rim_light = step(0.5f, fresnel);
 	DIFFUSE_LIGHT += rim_light * rim_color.rgb * rim_color.a * LIGHT_COLOR/PI;
+	ALPHA = 0.5 + clamp(pow(fresnel, 0.125), 0.0f, 1.0f)/2.0f;
 }
