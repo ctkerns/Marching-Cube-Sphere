@@ -3,7 +3,7 @@ extends Spatial
 var _chunks = []
 
 var _radius
-var _chunk_depth = 5
+var _chunk_depth = 7
 
 var Mesher = preload("res://Scripts/Octree/Mesher.gdns")
 var Generator = preload("res://Scripts/Generator.gdns")

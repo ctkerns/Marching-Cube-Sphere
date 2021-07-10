@@ -76,9 +76,9 @@ int Generator::sample_covering(float x, float y, float z) {
 	if (1.0 - magnitude/m_radius > 0.5)
 		return none;
 	
-	if (z > m_radius)
+	if (abs(z) > m_radius/2.5)
 		return snow;
-	if (magnitude > m_radius/1.5)
+	if (magnitude > m_radius/1.6)
 		return snow;
 	return grass;
 }
