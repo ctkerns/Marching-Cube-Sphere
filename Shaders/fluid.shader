@@ -1,5 +1,7 @@
 shader_type spatial;
 
+render_mode cull_disabled;
+
 void fragment() {
 	ALBEDO = vec3(0.03, 0.18, 0.25);
 }
