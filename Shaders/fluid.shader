@@ -45,6 +45,7 @@ void light() {
 	float fresnel = pow(1.0f - NdotV, rim_width);
 	vec4 rim_color = vec4(1.0f);
 	float rim_light = step(0.5f, fresnel);
-	DIFFUSE_LIGHT += rim_light * rim_color.rgb * rim_color.a * LIGHT_COLOR/PI;
+	if (length(DIFFUSE_LIGHT) > 0.2f)
+		DIFFUSE_LIGHT += rim_light * rim_color.rgb * rim_color.a * LIGHT_COLOR/PI;
 	ALPHA = 0.5 + clamp(pow(fresnel, 0.125), 0.0f, 1.0f)/2.0f;
 }
