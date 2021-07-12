@@ -7,38 +7,17 @@
 
 using namespace Material;
 
-// TODO:
-// In the change_terrain and is_underwater functions, return false if vertex is not in the space.
-
 void OctreeChunk::_register_methods() {
-	godot::register_method("_input", &OctreeChunk::_input);
 	godot::register_method("init", &OctreeChunk::init);
 	godot::register_method("draw", &OctreeChunk::draw);
 	godot::register_method("change_terrain", &OctreeChunk::change_terrain);
 	godot::register_method("is_underwater", &OctreeChunk::is_underwater);
+	godot::register_method("toggle_borders", &OctreeChunk::toggle_borders);
+	godot::register_method("toggle_dual", &OctreeChunk::toggle_dual);
 }
 
 void OctreeChunk::_init() {
 	m_tree = new Octree();
-}
-
-void OctreeChunk::_input(Variant event) {
-	std::cout << "hello" << std::endl;
-	InputEvent *input = static_cast<InputEvent*>(event);
-
-	if (input->is_action_pressed("toggle_borders")) {
-		if (m_borders->is_visible_in_tree())
-			m_borders->hide();
-		else
-			m_borders->show();
-	}
-
-	if (input->is_action_pressed("toggle_dual")) {
-		if (m_dual->is_visible_in_tree())
-			m_dual->hide();
-		else
-			m_dual->show();
-	}
 }
 
 void OctreeChunk::init(int depth, Generator *generator) {
@@ -53,9 +32,10 @@ void OctreeChunk::init(int depth, Generator *generator) {
 	m_surface = static_cast<MeshInstance*>(get_node("Surface"));
 	m_fluid   = static_cast<MeshInstance*>(get_node("Fluid"));
 
+	m_surface_body = static_cast<StaticBody*>(get_node("SurfaceBody"));
 	m_surface_shape = static_cast<CollisionShape*>(get_node("SurfaceBody/CollisionShape"));
 
-	float scale = pow(2, m_depth);
+	float scale = pow(2, m_depth - 1);
 	set_scale(Vector3(scale, scale, scale));
 		
 	generate();
@@ -74,11 +54,19 @@ void OctreeChunk::draw() {
 	// End drawing.
 	m_borders->set_mesh(m_mesher->end_tree());
 	m_dual->set_mesh(m_mesher->end_dual());
-	m_surface->set_mesh(m_mesher->end_surface());
+
+	Ref<ArrayMesh> surface_mesh = m_mesher->end_surface();
+	int vertex_count = surface_mesh->get_surface_count();
+	m_surface->set_mesh(surface_mesh);
+
 	m_fluid->set_mesh(m_mesher->end_fluid());
 
 	// Create collision shape.
-	m_surface_shape->set_shape(m_surface->get_mesh()->create_trimesh_shape());
+	if (vertex_count > 0)
+		m_surface_shape->set_shape(m_surface->get_mesh()->create_trimesh_shape());
+	else {
+		m_surface_body->queue_free();
+	}
 }
 
 Octree *OctreeChunk::get_tree() {
@@ -191,4 +179,18 @@ void OctreeChunk::change_terrain(Vector3 intersection, float delta) {
 bool OctreeChunk::is_underwater(Vector3 point) {
 	int node = m_tree->find_node(to_local(point));
 	return m_tree->get_fluid(node) > 0.5;
+}
+
+void OctreeChunk::toggle_borders() {
+	if (m_borders->is_visible_in_tree())
+		m_borders->hide();
+	else
+		m_borders->show();
+}
+
+void OctreeChunk::toggle_dual() {
+	if (m_dual->is_visible_in_tree())
+		m_dual->hide();
+	else
+		m_dual->show();
 }

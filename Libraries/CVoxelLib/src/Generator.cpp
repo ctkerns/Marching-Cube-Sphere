@@ -34,7 +34,7 @@ float Generator::sample(float x, float y, float z) {
 
 	// Add sphere shape and randomness.
 	vol += 1.0 - magnitude/m_radius;
-	vol += (float(rand())/RAND_MAX*2.0 - 1.0)/128.0;
+	vol += (float(rand())/RAND_MAX*2.0 - 1.0)/256.0;
 
 	if (vol > 1.0)
 		vol = 1.0;
