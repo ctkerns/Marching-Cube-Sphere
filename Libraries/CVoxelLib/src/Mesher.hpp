@@ -5,6 +5,7 @@
 #include <Mesh.hpp>
 #include <ArrayMesh.hpp>
 
+class OctreeChunk;
 #include "MarchingCubes.hpp"
 #include "Geometry.hpp"
 #include "OctreeChunk.hpp"

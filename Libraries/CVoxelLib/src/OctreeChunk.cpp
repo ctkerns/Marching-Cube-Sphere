@@ -7,8 +7,13 @@
 
 using namespace Material;
 
+// TODO:
+// In the change_terrain and is_underwater functions, return false if vertex is not in the space.
+
 void OctreeChunk::_register_methods() {
+	godot::register_method("_input", &OctreeChunk::_input);
 	godot::register_method("init", &OctreeChunk::init);
+	godot::register_method("draw", &OctreeChunk::draw);
 	godot::register_method("change_terrain", &OctreeChunk::change_terrain);
 	godot::register_method("is_underwater", &OctreeChunk::is_underwater);
 }
@@ -17,15 +22,63 @@ void OctreeChunk::_init() {
 	m_tree = new Octree();
 }
 
+void OctreeChunk::_input(Variant event) {
+	std::cout << "hello" << std::endl;
+	InputEvent *input = static_cast<InputEvent*>(event);
+
+	if (input->is_action_pressed("toggle_borders")) {
+		if (m_borders->is_visible_in_tree())
+			m_borders->hide();
+		else
+			m_borders->show();
+	}
+
+	if (input->is_action_pressed("toggle_dual")) {
+		if (m_dual->is_visible_in_tree())
+			m_dual->hide();
+		else
+			m_dual->show();
+	}
+}
+
 void OctreeChunk::init(int depth, Generator *generator) {
 	m_depth = depth;
 
 	m_generator = generator;
-	
+	m_mesher = Mesher::_new();
+
+	// Grab child nodes.
+	m_borders = static_cast<MeshInstance*>(get_node("Borders"));
+	m_dual 	  = static_cast<MeshInstance*>(get_node("Dual"));
+	m_surface = static_cast<MeshInstance*>(get_node("Surface"));
+	m_fluid   = static_cast<MeshInstance*>(get_node("Fluid"));
+
+	m_surface_shape = static_cast<CollisionShape*>(get_node("SurfaceBody/CollisionShape"));
+
 	float scale = pow(2, m_depth);
 	set_scale(Vector3(scale, scale, scale));
 		
 	generate();
+}
+
+void OctreeChunk::draw() {
+	// Start drawing.
+	m_mesher->begin_tree();
+	m_mesher->begin_dual();
+	m_mesher->begin_surface();
+	m_mesher->begin_fluid();
+
+	m_mesher->draw_tree(this);
+	m_mesher->draw(this);
+
+	// End drawing.
+	m_borders->set_mesh(m_mesher->end_tree());
+	m_dual->set_mesh(m_mesher->end_dual());
+	m_surface->set_mesh(m_mesher->end_surface());
+	m_fluid->set_mesh(m_mesher->end_fluid());
+
+	// Create collision shape.
+	m_surface_shape->set_shape(m_surface->get_mesh()->create_trimesh_shape());
 }
 
 Octree *OctreeChunk::get_tree() {

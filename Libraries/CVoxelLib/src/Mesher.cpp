@@ -84,8 +84,8 @@ void Mesher::draw_tree(OctreeChunk *chunk) {
 			Array bounds = octree->get_bounds(id);
 
 			// Scale bounds from chunk space.
-			Vector3 corner_a = chunk->to_global(bounds[0]);
-			Vector3 corner_b = chunk->to_global((Vector3)(bounds[0]) + Vector3(bounds[1], bounds[1], bounds[1]));
+			Vector3 corner_a = bounds[0];
+			Vector3 corner_b = (Vector3)(bounds[0]) + Vector3(bounds[1], bounds[1], bounds[1]);
 
 			Geometry::draw_cuboid_edge(corner_a, corner_b, m_tree);
 		} else {
@@ -291,14 +291,14 @@ void Mesher::vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t
 	if (num_leaves >= 8) {
 		// All nodes surrounding the vertex are leaves so draw the dual volume here.
 		Vector3 v[8] = {
-			chunk->to_global(octree->get_vertex(t0)),
-			chunk->to_global(octree->get_vertex(t1)),
-			chunk->to_global(octree->get_vertex(t2)),
-			chunk->to_global(octree->get_vertex(t3)),
-			chunk->to_global(octree->get_vertex(t4)),
-			chunk->to_global(octree->get_vertex(t5)),
-			chunk->to_global(octree->get_vertex(t6)),
-			chunk->to_global(octree->get_vertex(t7))
+			octree->get_vertex(t0),
+			octree->get_vertex(t1),
+			octree->get_vertex(t2),
+			octree->get_vertex(t3),
+			octree->get_vertex(t4),
+			octree->get_vertex(t5),
+			octree->get_vertex(t6),
+			octree->get_vertex(t7)
 		};
 
 		float d[8] = {

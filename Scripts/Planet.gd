@@ -5,17 +5,10 @@ var _chunks = []
 var _radius
 var _chunk_depth = 7
 
-var Mesher = preload("res://Scripts/Octree/Mesher.gdns")
 var Generator = preload("res://Scripts/Generator.gdns")
 
-var _mesher
 var _generator
 
-onready var borders = get_node("Borders")
-onready var dual = get_node("Dual")
-onready var surface = get_node("Surface")
-onready var fluid = get_node("Fluid")
-onready var surface_shape = get_node("SurfaceBody/CollisionShape")
 onready var player = get_node("Player")
 
 func _ready():
@@ -31,52 +24,23 @@ func init(radius):
 	
 	for chunk in _chunks:
 		chunk.init(_chunk_depth, _generator)
-		
-	_mesher = Mesher.new()
 
 func draw():
-	_mesher.begin_tree()
-	_mesher.begin_dual()
-	_mesher.begin_surface()
-	_mesher.begin_fluid()
-
 	# Create vertex data.
 	for chunk in _chunks:
-		_mesher.draw_tree(chunk)
-		_mesher.draw(chunk)
+		chunk.draw()
 
-	borders.mesh = _mesher.end_tree()
-	dual.mesh = _mesher.end_dual()
-	surface.mesh = _mesher.end_surface()
-	fluid.mesh = _mesher.end_fluid()
-
-	# Create shapes for physics.
-	surface_shape.set_shape(surface.mesh.create_trimesh_shape())
-
-func _process(_delta):
-	pass#draw()
-	
-func _input(event):
-	if event.is_action_pressed("toggle_borders"):
-		if borders.is_visible_in_tree():
-			borders.hide()
-		else:
-			borders.show()
-	if event.is_action_pressed("toggle_dual"):
-		if dual.is_visible_in_tree():
-			dual.hide()
-		else:
-			dual.show()
-			
 func carve_terrain(intersection: Vector3):
 	for chunk in _chunks:
-		chunk.change_terrain(intersection, -0.5)
-	draw()
+		var found_vertex = chunk.change_terrain(intersection, -0.5)
+		if found_vertex:
+			chunk.draw()
 
 func place_terrain(intersection: Vector3):
 	for chunk in _chunks:
-		chunk.change_terrain(intersection, 0.5)
-	draw()
+		var found_vertex = chunk.change_terrain(intersection, 0.5)
+		if found_vertex:
+			chunk.draw()
 	
 func _underwater(point: Vector3, caller):
 	var underwater = false
