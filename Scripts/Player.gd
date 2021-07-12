@@ -50,9 +50,9 @@ func _process(_delta):
 	
 	# Modify the environment.
 	if ray_cast.is_colliding() and ray_cast.is_enabled():
-		if Input.is_action_just_pressed("left_click"):
+		if Input.is_action_pressed("left_click"):
 			emit_signal("carve_terrain", ray_cast.get_collision_point())
-		if Input.is_action_just_pressed("right_click"):
+		if Input.is_action_pressed("right_click"):
 			emit_signal("place_terrain", ray_cast.get_collision_point())
 	
 	# Check if underwater.
