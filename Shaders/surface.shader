@@ -15,22 +15,22 @@ uniform vec4 color1: hint_color;
 uniform vec4 color2: hint_color;
 
 void vertex() {
-	local_vertex = VERTEX;
+	local_vertex = (CAMERA_MATRIX * vec4(VERTEX, 1.0f)).xyz;
 	local_normal = NORMAL;
 	uv = UV;
 }
 
 void fragment() {
 	// Select colors.
-	vec3 material_color = texture(materials, vec2(uv.x, 0.5)).rgb;
-	vec3 covering_color = texture(coverings, vec2(uv.y, 0.5)).rgb;
+	vec3 material_color = texture(materials, vec2(uv.x, 0.5f)).rgb;
+	vec3 covering_color = texture(coverings, vec2(uv.y, 0.5f)).rgb;
 	
 	// Determine how much this fragment is facing up.
 	float mag = dot(normalize(local_vertex), local_normal);
-	mag = (mag + 1.0)/2.0;
+	mag = (mag + 1.0f)/2.0f;
 	
 	// Decide whether this is the top of the terrain or not.
-	if (mag > 0.7 && uv.y < 1.0)
+	if (mag > 0.7f && uv.y < 1.0f)
 		ALBEDO = covering_color;
 	else
 		ALBEDO = material_color;
@@ -45,14 +45,14 @@ void light() {
 	float attenuation = ATTENUATION.x;
 
 	// Split the attenuation.
-	if (attenuation < 0.1)
-		attenuation = 0.0;
+	if (attenuation < 0.1f)
+		attenuation = 0.0f;
 	else
-		attenuation = 1.0;
+		attenuation = 1.0f;
 
-	float diffuse_amount = NdotL + (attenuation - 1.0);
-	float cuts = 6.0;
-	float diffuse_stepped = clamp(diffuse_amount + mod(1.0f - diffuse_amount, 1.0/cuts), 0.0f, 1.0f);
+	float diffuse_amount = NdotL + (attenuation - 1.0f);
+	float cuts = 6.0f;
+	float diffuse_stepped = clamp(diffuse_amount + mod(1.0f - diffuse_amount, 1.0f/cuts), 0.0f, 1.0f);
 
 	vec3 diffuse = ALBEDO.rgb*LIGHT_COLOR/PI;
 	diffuse *= diffuse_stepped;
