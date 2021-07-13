@@ -1,6 +1,7 @@
 extends Spatial
 
 var _chunks = {}
+var _stitches = {}
 
 var _radius
 var _chunk_depth = 4
@@ -9,6 +10,7 @@ onready var _chunk_size = pow(2, _chunk_depth)
 
 var Generator = preload("res://Scripts/Generator.gdns")
 var Chunk = preload("res://Scenes/Chunk.tscn")
+var StitchChunk = preload("res://Scenes/StitchChunk.tscn")
 
 var _generator
 
@@ -26,13 +28,27 @@ func init(radius):
 	player.translation.y = _radius
 
 func _process(_delta):
-	# Render chunks.
+	# Add chunks.
 	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
 
 	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
 		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
 			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
 				add_chunk(i, j, k)
+	
+	for i in range(id.x - _render_distance, id.x + _render_distance):
+		for j in range(id.y - _render_distance, id.y + _render_distance):
+			for k in range(id.z - _render_distance, id.z + _render_distance):
+				add_corner_stitch(i, j, k,
+					_chunks[get_chunk_key(i,	 j,		k	 )],
+					_chunks[get_chunk_key(i,	 j,		k + 1)],
+					_chunks[get_chunk_key(i,	 j + 1, k	 )],
+					_chunks[get_chunk_key(i,	 j + 1, k + 1)],
+					_chunks[get_chunk_key(i + 1, j, 	k	 )],
+					_chunks[get_chunk_key(i + 1, j, 	k + 1)],
+					_chunks[get_chunk_key(i + 1, j + 1, k	 )],
+					_chunks[get_chunk_key(i + 1, j + 1, k + 1)]
+				)
 
 func _input(event):
 	if event.is_action_pressed("toggle_borders"):
@@ -43,6 +59,8 @@ func _input(event):
 	if event.is_action_pressed("toggle_dual"):
 		for key in _chunks:
 			_chunks[key].toggle_dual()
+		for key in _stitches:
+			_stitches[key].toggle_dual()
 		_show_dual = not _show_dual
 
 func add_chunk(x, y, z):
@@ -67,6 +85,31 @@ func add_chunk(x, y, z):
 
 	_chunks[key] = chunk
 
+func add_side_stitch():
+	pass
+
+func add_edge_stitch():
+	pass
+
+func add_corner_stitch(x, y, z, c0, c1, c2, c3, c4, c5, c6, c7):
+	# Do not create a new stitch if the current one already exists.
+	var key = get_chunk_key(x, y, z) + "v"
+	if _stitches.has(key):
+		return
+
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
+	
+	stitch.draw_vert(c0, c1, c2, c3, c4, c5, c6, c7)
+
+	_stitches[key] = stitch
+
 func get_chunk_id(x, y, z):
 	var id_x = floor(x/_chunk_size + 0.5)
 	var id_y = floor(y/_chunk_size + 0.5)
@@ -75,7 +118,7 @@ func get_chunk_id(x, y, z):
 	return Vector3(id_x, id_y, id_z)
 
 func get_chunk_key(x, y, z):
-	return str(x) + "," + str(y) + "," + str(z)
+	return str(int(x)) + "," + str(int(y)) + "," + str(int(z))
 
 func carve_terrain(intersection: Vector3):
 	# Find chunk.

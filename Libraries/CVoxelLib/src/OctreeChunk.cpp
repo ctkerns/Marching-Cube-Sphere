@@ -123,10 +123,14 @@ void OctreeChunk::generate() {
 
 			// Check if the children are homogenous.
 			bool homogenous = true;
-			bool first_child = m_tree->get_density(m_tree->get_child(node, 0)) >= threshold;
+			float average = m_tree->get_density(m_tree->get_child(node, 0));
+			bool first_child = average >= threshold;
+			average /= 8.0f;
 
 			for (int k=1; k < 8; k++) {
-				bool child = m_tree->get_density(m_tree->get_child(node, k)) >= threshold;
+				float density = m_tree->get_density(m_tree->get_child(node, k));
+				average += density/8.0f;
+				bool child = density >= threshold;
 				if (child != first_child) {
 					homogenous = false;
 					break;
@@ -134,15 +138,17 @@ void OctreeChunk::generate() {
 			}
 
 			// Check if the children have homogenous fluidity.
-			if (homogenous && first_child == 0) {
-				bool first_fluid = m_tree->get_fluid(m_tree->get_child(node, 0)) >= threshold;
+			float average_fluid = m_tree->get_fluid(m_tree->get_child(node, 0));
+			bool first_fluid = average >= threshold;
+			average_fluid /= 8.0f;
 
-				for (int k=1; k < 8; k++) {
-					bool child = m_tree->get_fluid(m_tree->get_child(node, k)) >= threshold;
-					if (child != first_fluid) {
-						homogenous = false;
-						break;
-					}
+			for (int k=1; k < 8; k++) {
+				float density = m_tree->get_fluid(m_tree->get_child(node, k));
+				average_fluid += density/8.0f;
+				bool child = density >= threshold;
+				if (child != first_fluid) {
+					homogenous = false;
+					break;
 				}
 			}
 
@@ -158,6 +164,10 @@ void OctreeChunk::generate() {
 			if (homogenous && all_leaves)
 				for (int k=0; k < 8; k++)
 					m_tree->delete_node(m_tree->get_child(node, k));
+
+			// Set density to the average of the children.
+			m_tree->set_density(node, average);
+			m_tree->set_fluid(node, average_fluid);
 		}
 	}
 }
