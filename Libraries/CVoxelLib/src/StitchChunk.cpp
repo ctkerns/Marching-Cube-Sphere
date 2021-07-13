@@ -38,10 +38,12 @@ void StitchChunk::end() {
 	// End drawing.
 	m_dual_mesh->set_mesh(m_dual->commit());
 
+	m_surface->generate_normals();
 	Ref<ArrayMesh> surface_mesh = m_surface->commit();
 	int vertex_count = surface_mesh->get_surface_count();
 	m_surface_mesh->set_mesh(surface_mesh);
 
+	m_fluid->generate_normals();
 	m_fluid_mesh->set_mesh(m_fluid->commit());
 
 	// Create collision shape.
