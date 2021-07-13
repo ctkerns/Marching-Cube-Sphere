@@ -2,8 +2,6 @@
 
 #include <Godot.hpp>
 
-#define EPSILON 0.000001
-
 using godot::Vector2;
 using godot::Color;
 
