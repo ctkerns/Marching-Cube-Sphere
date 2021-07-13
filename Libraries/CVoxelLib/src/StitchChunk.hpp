@@ -32,6 +32,10 @@ private:
 	SurfaceTool *m_surface;
 	SurfaceTool *m_fluid;
 
+	const int plane_x[4] = {0b000, 0b001, 0b010, 0b011};
+	const int plane_y[4] = {0b000, 0b001, 0b100, 0b101};
+	const int plane_z[4] = {0b000, 0b010, 0b100, 0b110};
+
 	void begin();
 	void end();
 
@@ -50,6 +54,13 @@ public:
 		OctreeChunk *c4, OctreeChunk *c5, OctreeChunk *c6, OctreeChunk *c7
 	);
 
+	void StitchChunk::face_proc(
+		OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, int axis
+	);
+	void edge_proc(
+		OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
+		int t0, int t1, int t2, int t3, int axis
+	);
 	void vert_proc(
 		OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
 		OctreeChunk *c4, OctreeChunk *c5, OctreeChunk *c6, OctreeChunk *c7,

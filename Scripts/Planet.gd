@@ -36,6 +36,7 @@ func _process(_delta):
 			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
 				add_chunk(i, j, k)
 	
+	# Add stitches.
 	for i in range(id.x - _render_distance, id.x + _render_distance):
 		for j in range(id.y - _render_distance, id.y + _render_distance):
 			for k in range(id.z - _render_distance, id.z + _render_distance):
@@ -48,6 +49,48 @@ func _process(_delta):
 					_chunks[get_chunk_key(i + 1, j, 	k + 1)],
 					_chunks[get_chunk_key(i + 1, j + 1, k	 )],
 					_chunks[get_chunk_key(i + 1, j + 1, k + 1)]
+				)
+
+				add_edge_stitch(i, j, k,
+					_chunks[get_chunk_key(i,	 j,	    k)],
+					_chunks[get_chunk_key(i,	 j + 1, k)],
+					_chunks[get_chunk_key(i + 1, j,		k)],
+					_chunks[get_chunk_key(i + 1, j + 1, k)],
+					1
+				)
+
+				add_edge_stitch(i, j, k,
+					_chunks[get_chunk_key(i, 	 j, k	 )],
+					_chunks[get_chunk_key(i, 	 j, k + 1)],
+					_chunks[get_chunk_key(i + 1, j, k	 )],
+					_chunks[get_chunk_key(i + 1, j, k + 1)],
+					2
+				)
+
+				add_edge_stitch(i, j, k,
+					_chunks[get_chunk_key(i, j,		k	 )],
+					_chunks[get_chunk_key(i, j,		k + 1)],
+					_chunks[get_chunk_key(i, j + 1, k	 )],
+					_chunks[get_chunk_key(i, j + 1, k + 1)],
+					4
+				)
+
+				add_side_stitch(i, j, k,
+					_chunks[get_chunk_key(i, j, k	 )],
+					_chunks[get_chunk_key(i, j, k + 1)],
+					1
+				)
+
+				add_side_stitch(i, j, k,
+					_chunks[get_chunk_key(i, j,		k)],
+					_chunks[get_chunk_key(i, j + 1, k)],
+					2
+				)
+
+				add_side_stitch(i, j, k,
+					_chunks[get_chunk_key(i,	 j, k)],
+					_chunks[get_chunk_key(i + 1, j, k)],
+					4
 				)
 
 func _input(event):
@@ -85,11 +128,43 @@ func add_chunk(x, y, z):
 
 	_chunks[key] = chunk
 
-func add_side_stitch():
-	pass
+func add_side_stitch(x, y, z, c0, c1, axis):
+	# Do not create a new stitch if the current one already exists.
+	var key = get_chunk_key(x, y, z) + "f" + str(axis)
+	if _stitches.has(key):
+		return
 
-func add_edge_stitch():
-	pass
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
+
+	stitch.draw_face(c0, c1, axis)
+
+	_stitches[key] = stitch
+
+func add_edge_stitch(x, y, z, c0, c1, c2, c3, axis):
+	# Do not create a new stitch if the current one already exists.
+	var key = get_chunk_key(x, y, z) + "e" + str(axis)
+	if _stitches.has(key):
+		return
+
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
+
+	stitch.draw_edge(c0, c1, c2, c3, axis)
+
+	_stitches[key] = stitch
 
 func add_corner_stitch(x, y, z, c0, c1, c2, c3, c4, c5, c6, c7):
 	# Do not create a new stitch if the current one already exists.
