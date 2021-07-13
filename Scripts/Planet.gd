@@ -2,10 +2,13 @@ extends Spatial
 
 var _chunks = {}
 var _stitches = {}
+var _unloaded_chunks = {}
+
+onready var _thread = Thread.new()
 
 var _radius
 var _chunk_depth = 4
-var _render_distance = 1
+var _render_distance = 2
 onready var _chunk_size = pow(2, _chunk_depth)
 
 var Generator = preload("res://Scripts/Generator.gdns")
@@ -37,59 +40,59 @@ func _process(_delta):
 				add_chunk(i, j, k)
 	
 	# Add stitches.
-	for i in range(id.x - _render_distance, id.x + _render_distance):
-		for j in range(id.y - _render_distance, id.y + _render_distance):
-			for k in range(id.z - _render_distance, id.z + _render_distance):
+	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
+		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
+			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
 				add_corner_stitch(i, j, k,
-					_chunks[get_chunk_key(i,	 j,		k	 )],
-					_chunks[get_chunk_key(i,	 j,		k + 1)],
-					_chunks[get_chunk_key(i,	 j + 1, k	 )],
-					_chunks[get_chunk_key(i,	 j + 1, k + 1)],
-					_chunks[get_chunk_key(i + 1, j, 	k	 )],
-					_chunks[get_chunk_key(i + 1, j, 	k + 1)],
-					_chunks[get_chunk_key(i + 1, j + 1, k	 )],
-					_chunks[get_chunk_key(i + 1, j + 1, k + 1)]
+					get_chunk_key(i,	 j,		k	 ),
+					get_chunk_key(i,	 j,		k + 1),
+					get_chunk_key(i,	 j + 1, k	 ),
+					get_chunk_key(i,	 j + 1, k + 1),
+					get_chunk_key(i + 1, j, 	k	 ),
+					get_chunk_key(i + 1, j, 	k + 1),
+					get_chunk_key(i + 1, j + 1, k	 ),
+					get_chunk_key(i + 1, j + 1, k + 1)
 				)
 
 				add_edge_stitch(i, j, k,
-					_chunks[get_chunk_key(i,	 j,	    k)],
-					_chunks[get_chunk_key(i,	 j + 1, k)],
-					_chunks[get_chunk_key(i + 1, j,		k)],
-					_chunks[get_chunk_key(i + 1, j + 1, k)],
+					get_chunk_key(i,	 j,	    k),
+					get_chunk_key(i,	 j + 1, k),
+					get_chunk_key(i + 1, j,		k),
+					get_chunk_key(i + 1, j + 1, k),
 					1
 				)
 
 				add_edge_stitch(i, j, k,
-					_chunks[get_chunk_key(i, 	 j, k	 )],
-					_chunks[get_chunk_key(i, 	 j, k + 1)],
-					_chunks[get_chunk_key(i + 1, j, k	 )],
-					_chunks[get_chunk_key(i + 1, j, k + 1)],
+					get_chunk_key(i, 	 j, k	 ),
+					get_chunk_key(i, 	 j, k + 1),
+					get_chunk_key(i + 1, j, k	 ),
+					get_chunk_key(i + 1, j, k + 1),
 					2
 				)
 
 				add_edge_stitch(i, j, k,
-					_chunks[get_chunk_key(i, j,		k	 )],
-					_chunks[get_chunk_key(i, j,		k + 1)],
-					_chunks[get_chunk_key(i, j + 1, k	 )],
-					_chunks[get_chunk_key(i, j + 1, k + 1)],
+					get_chunk_key(i, j,		k	 ),
+					get_chunk_key(i, j,		k + 1),
+					get_chunk_key(i, j + 1, k	 ),
+					get_chunk_key(i, j + 1, k + 1),
 					4
 				)
 
 				add_side_stitch(i, j, k,
-					_chunks[get_chunk_key(i, j, k	 )],
-					_chunks[get_chunk_key(i, j, k + 1)],
+					get_chunk_key(i, j, k	 ),
+					get_chunk_key(i, j, k + 1),
 					1
 				)
 
 				add_side_stitch(i, j, k,
-					_chunks[get_chunk_key(i, j,		k)],
-					_chunks[get_chunk_key(i, j + 1, k)],
+					get_chunk_key(i, j,		k),
+					get_chunk_key(i, j + 1, k),
 					2
 				)
 
 				add_side_stitch(i, j, k,
-					_chunks[get_chunk_key(i,	 j, k)],
-					_chunks[get_chunk_key(i + 1, j, k)],
+					get_chunk_key(i,	 j, k),
+					get_chunk_key(i + 1, j, k),
 					4
 				)
 
@@ -109,8 +112,90 @@ func _input(event):
 func add_chunk(x, y, z):
 	# Do not create a new chunk if the current one already exists.
 	var key = get_chunk_key(x, y, z)
-	if _chunks.has(key):
+	if _chunks.has(key) or _unloaded_chunks.has(key):
 		return
+
+	# Load chunks in a separate thread.
+	if not _thread.is_active():
+		_thread.start(self, "load_chunk", [_thread, x, y, z])
+		_unloaded_chunks[key] = 1
+
+func add_side_stitch(x, y, z, c0, c1, axis):
+	# Do not create a new stitch if the current one already exists.
+	var key = get_chunk_key(x, y, z) + "f" + str(axis)
+	if _stitches.has(key):
+		return
+
+	# Do not create a stitch if the requisit chunks do not exist.
+	if not (_chunks.has(c0) and _chunks.has(c1)):
+		return
+
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
+
+	stitch.draw_face(_chunks[c0], _chunks[c1], axis)
+
+	_stitches[key] = stitch
+
+func add_edge_stitch(x, y, z, c0, c1, c2, c3, axis):
+	# Do not create a new stitch if the current one already exists.
+	var key = get_chunk_key(x, y, z) + "e" + str(axis)
+	if _stitches.has(key):
+		return
+
+	# Do not create a stitch if the requisit chunks do not exist.
+	if not (_chunks.has(c0) and _chunks.has(c1) and _chunks.has(c2) and _chunks.has(c3)):
+		return
+
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
+
+	stitch.draw_edge(_chunks[c0], _chunks[c1], _chunks[c2], _chunks[c3], axis)
+
+	_stitches[key] = stitch
+
+func add_corner_stitch(x, y, z, c0, c1, c2, c3, c4, c5, c6, c7):
+	# Do not create a new stitch if the current one already exists.
+	var key = get_chunk_key(x, y, z) + "v"
+	if _stitches.has(key):
+		return
+
+	# Do not create a stitch if the requisit chunks do not exist.
+	if not (_chunks.has(c0) and _chunks.has(c1) and _chunks.has(c2) and _chunks.has(c3) and _chunks.has(c4) and _chunks.has(c5) and _chunks.has(c6) and _chunks.has(c7)):
+		return
+
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
+	
+	stitch.draw_vert(_chunks[c0], _chunks[c1], _chunks[c2], _chunks[c3], _chunks[c4], _chunks[c5], _chunks[c6], _chunks[c7])
+
+	_stitches[key] = stitch
+
+func load_chunk(args):
+	# Retrieve arguments.
+	var thread = args[0]
+	var x = args[1]
+	var y = args[2]
+	var z = args[3]
+	var key = get_chunk_key(x, y, z)
 
 	# Create a new chunk, add it to the scene tree, and draw it.
 	var chunk = Chunk.instance()
@@ -127,63 +212,8 @@ func add_chunk(x, y, z):
 	chunk.draw()
 
 	_chunks[key] = chunk
-
-func add_side_stitch(x, y, z, c0, c1, axis):
-	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + "f" + str(axis)
-	if _stitches.has(key):
-		return
-
-	# Create a new stitch, add it to the scene tree, and draw it.
-	var stitch = StitchChunk.instance()
-	add_child(stitch)
-	stitch.init()
-
-	# Show debug lines.
-	if _show_dual:
-		stitch.toggle_dual()
-
-	stitch.draw_face(c0, c1, axis)
-
-	_stitches[key] = stitch
-
-func add_edge_stitch(x, y, z, c0, c1, c2, c3, axis):
-	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + "e" + str(axis)
-	if _stitches.has(key):
-		return
-
-	# Create a new stitch, add it to the scene tree, and draw it.
-	var stitch = StitchChunk.instance()
-	add_child(stitch)
-	stitch.init()
-
-	# Show debug lines.
-	if _show_dual:
-		stitch.toggle_dual()
-
-	stitch.draw_edge(c0, c1, c2, c3, axis)
-
-	_stitches[key] = stitch
-
-func add_corner_stitch(x, y, z, c0, c1, c2, c3, c4, c5, c6, c7):
-	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + "v"
-	if _stitches.has(key):
-		return
-
-	# Create a new stitch, add it to the scene tree, and draw it.
-	var stitch = StitchChunk.instance()
-	add_child(stitch)
-	stitch.init()
-
-	# Show debug lines.
-	if _show_dual:
-		stitch.toggle_dual()
-	
-	stitch.draw_vert(c0, c1, c2, c3, c4, c5, c6, c7)
-
-	_stitches[key] = stitch
+	_unloaded_chunks.erase(key)
+	thread.wait_to_finish()
 
 func get_chunk_id(x, y, z):
 	var id_x = floor(x/_chunk_size + 0.5)
@@ -217,7 +247,10 @@ func _underwater(point: Vector3, caller):
 	# Find chunk.
 	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
 	var key = get_chunk_key(id.x, id.y, id.z)
-	var chunk = _chunks[key]
 	
-	var underwater = chunk.is_underwater(point)
-	caller.underwater(underwater)
+	# Only check if underwater if the current chunk is loaded.
+	if _chunks.has(key):
+		var chunk = _chunks[key]
+	
+		var underwater = chunk.is_underwater(point)
+		caller.underwater(underwater)
