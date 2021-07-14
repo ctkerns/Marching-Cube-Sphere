@@ -28,7 +28,7 @@ func init(radius):
 	_generator.set_radius(_radius)
 
 	# Set the players position so they don't get stuck.
-	player.translation.y = _radius
+	player.translation.y = _radius/2.0
 
 func _process(_delta):
 	# Add chunks.
