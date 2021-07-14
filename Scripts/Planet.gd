@@ -34,9 +34,9 @@ func _process(_delta):
 	# Add chunks.
 	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
 
-	for i in range(id.x - _render_distance, id.x + _render_distance):
-		for j in range(id.y - _render_distance, id.y + _render_distance):
-			for k in range(id.z - _render_distance, id.z + _render_distance):
+	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
+		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
+			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
 				add_chunk(i, j, k)
 	
 	# Add stitches.
@@ -153,10 +153,15 @@ func load_chunk(args):
 	var z = args[3]
 	var key = get_chunk_key(x, y, z)
 
-	# Create a new chunk, add it to the scene tree, and draw it.
+	# Create a new chunk.
 	var chunk = Chunk.instance()
-	add_child(chunk)
 	chunk.translation = Vector3(x*_chunk_size, y*_chunk_size, z*_chunk_size)
+
+	call_deferred("load_done", thread, chunk, key)
+
+func load_done(thread, chunk, key):
+	# Instantiate the chunk.
+	add_child(chunk)
 	chunk.init(_chunk_depth, _generator)
 	
 	# Show debug lines.
@@ -169,9 +174,7 @@ func load_chunk(args):
 
 	_chunks[key] = chunk
 	_unloaded_chunks.erase(key)
-	call_deferred("load_done", thread)
 
-func load_done(thread):
 	thread.wait_to_finish()
 
 func get_chunk_id(x, y, z):
