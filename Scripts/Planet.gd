@@ -259,12 +259,6 @@ func load_chunk(args):
 	add_child(chunk)
 	chunk.init(_chunk_depth, _generator)
 
-	# Show debug lines.
-	if _show_borders:
-		chunk.toggle_borders()
-	if _show_dual:
-		chunk.toggle_dual()
-
 	# Generate the chunk.
 	chunk.generate()
 	chunk.draw()
@@ -274,6 +268,12 @@ func load_chunk(args):
 func load_done(thread, chunk, key):
 	_chunks[key] = chunk
 	_unloaded_chunks.erase(key)
+
+	# Show debug lines.
+	if _show_borders:
+		chunk.toggle_borders()
+	if _show_dual:
+		chunk.toggle_dual()
 
 	thread.wait_to_finish()
 
@@ -302,6 +302,8 @@ func get_chunk_key(x, y, z):
 func get_stitch_key(x, y, z, stitch_type, axis):
 	return get_chunk_key(x, y, z) + stitch_type + str(axis)
 
+# Here the mesh can get detached because terrain is being generated in the middle of
+# this being drawn.
 func carve_terrain(intersection: Vector3):
 	# Find chunk.
 	var id = get_chunk_id(intersection.x, intersection.y, intersection.z)
@@ -312,7 +314,7 @@ func carve_terrain(intersection: Vector3):
 
 	# Redraw chunk and stitches.
 	if not _draw_thread.is_active():
-		_draw_thread.start(self, "redraw_chunk", [_draw_thread, key])
+		_draw_thread.start(self, "redraw_chunk", [_draw_thread, key, intersection])
 
 func place_terrain(intersection: Vector3):
 	# Find chunk.
