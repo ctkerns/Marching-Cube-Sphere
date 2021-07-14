@@ -163,7 +163,7 @@ void OctreeChunk::draw() {
 	if (vertex_count > 0)
 		m_surface_shape->set_shape(m_surface->get_mesh()->create_trimesh_shape());
 	else {
-		m_surface_body->queue_free();
+		m_surface_body->call_deferred("free");
 	}
 }
 
