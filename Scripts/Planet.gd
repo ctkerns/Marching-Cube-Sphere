@@ -98,6 +98,9 @@ func _input(event):
 func load_world():
 	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
 	var queue = []
+
+	if add_chunk(id.x, id.y, id.z):
+		return
 	
 	load_face(queue, id.x + 1, id.y, id.z, 1,  1,  0,  0)
 	load_face(queue, id.x - 1, id.y, id.z, 1, -1,  0,  0)
@@ -146,7 +149,8 @@ func load_vert(queue, x, y, z, dist, d_x, d_y, d_z):
 	if dist > _render_distance:
 		return
 
-	add_chunk(x, y, z)
+	if add_chunk(x, y, z):
+		return
 
 	# Use queue to recursively traverse the grid area.
 	queue.push_back(["vert", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
@@ -164,7 +168,8 @@ func load_edge(queue, x, y, z, dist, d_x, d_y, d_z):
 	if dist > _render_distance:
 		return
 	
-	add_chunk(x, y, z)
+	if add_chunk(x, y, z):
+		return
 
 	# Use queue to recursively traverse the grid area.
 	queue.push_back(["edge", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
@@ -184,21 +189,28 @@ func load_face(queue, x, y, z, dist, d_x, d_y, d_z):
 	if dist > _render_distance:
 		return
 	
-	add_chunk(x, y, z)
+	if add_chunk(x, y, z):
+		return
 
 	# Use queue to recursively traverse the grid area.
 	queue.push_back(["face", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
 
+# If chunk is still being loaded, return true.
 func add_chunk(x, y, z):
 	# Do not create a new chunk if the current one already exists.
 	var key = get_chunk_key(x, y, z)
-	if _chunks.has(key) or _unloaded_chunks.has(key):
+	if _chunks.has(key):
 		return false
+
+	if _unloaded_chunks.has(key):
+		return true
 
 	# Load chunks in a separate thread.
 	if not _thread.is_active():
 		_thread.start(self, "load_chunk", [_thread, key, x, y, z])
 		_unloaded_chunks[key] = 1
+	
+	return true
 
 func add_stitch(x, y, z, keys, axis):
 	var stitch_type
