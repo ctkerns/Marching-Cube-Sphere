@@ -34,16 +34,16 @@ func _process(_delta):
 	# Add chunks.
 	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
 
-	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
-		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
-			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
+	for i in range(id.x - _render_distance, id.x + _render_distance):
+		for j in range(id.y - _render_distance, id.y + _render_distance):
+			for k in range(id.z - _render_distance, id.z + _render_distance):
 				add_chunk(i, j, k)
 	
 	# Add stitches.
 	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
 		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
 			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
-				add_corner_stitch(i, j, k,
+				add_stitch(i, j, k, [
 					get_chunk_key(i,	 j,		k	 ),
 					get_chunk_key(i,	 j,		k + 1),
 					get_chunk_key(i,	 j + 1, k	 ),
@@ -52,49 +52,32 @@ func _process(_delta):
 					get_chunk_key(i + 1, j, 	k + 1),
 					get_chunk_key(i + 1, j + 1, k	 ),
 					get_chunk_key(i + 1, j + 1, k + 1)
-				)
+				], null)
 
-				add_edge_stitch(i, j, k,
+				add_stitch(i, j, k, [
 					get_chunk_key(i,	 j,	    k),
 					get_chunk_key(i,	 j + 1, k),
 					get_chunk_key(i + 1, j,		k),
-					get_chunk_key(i + 1, j + 1, k),
-					1
-				)
+					get_chunk_key(i + 1, j + 1, k)
+				], 1)
 
-				add_edge_stitch(i, j, k,
+				add_stitch(i, j, k, [
 					get_chunk_key(i, 	 j, k	 ),
 					get_chunk_key(i, 	 j, k + 1),
 					get_chunk_key(i + 1, j, k	 ),
-					get_chunk_key(i + 1, j, k + 1),
-					2
-				)
+					get_chunk_key(i + 1, j, k + 1)
+				], 2)
 
-				add_edge_stitch(i, j, k,
+				add_stitch(i, j, k, [
 					get_chunk_key(i, j,		k	 ),
 					get_chunk_key(i, j,		k + 1),
 					get_chunk_key(i, j + 1, k	 ),
-					get_chunk_key(i, j + 1, k + 1),
-					4
-				)
+					get_chunk_key(i, j + 1, k + 1)
+				], 4)
 
-				add_side_stitch(i, j, k,
-					get_chunk_key(i, j, k	 ),
-					get_chunk_key(i, j, k + 1),
-					1
-				)
-
-				add_side_stitch(i, j, k,
-					get_chunk_key(i, j,		k),
-					get_chunk_key(i, j + 1, k),
-					2
-				)
-
-				add_side_stitch(i, j, k,
-					get_chunk_key(i,	 j, k),
-					get_chunk_key(i + 1, j, k),
-					4
-				)
+				add_stitch(i, j, k, [get_chunk_key(i, j, k), get_chunk_key(i, j, k + 1)], 1)
+				add_stitch(i, j, k, [get_chunk_key(i, j, k), get_chunk_key(i, j + 1, k)], 2)
+				add_stitch(i, j, k, [get_chunk_key(i, j, k), get_chunk_key(i + 1, j, k)], 4)
 
 func _input(event):
 	if event.is_action_pressed("toggle_borders"):
@@ -120,74 +103,47 @@ func add_chunk(x, y, z):
 		_thread.start(self, "load_chunk", [_thread, x, y, z])
 		_unloaded_chunks[key] = 1
 
-func add_side_stitch(x, y, z, c0, c1, axis):
+func add_stitch(x, y, z, keys, axis):
+	var stitch_type
+	match keys.size():
+		2:
+			stitch_type = "f"
+		4:
+			stitch_type = "e"
+		8:
+			stitch_type = "v"
+
 	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + "f" + str(axis)
+	var key = get_chunk_key(x, y, z) + stitch_type + str(axis)
 	if _stitches.has(key):
 		return
 
-	# Do not create a stitch if the requisit chunks do not exist.
-	if not (_chunks.has(c0) and _chunks.has(c1)):
-		return
+	# Get chunks, but do not create a stitch if the chunks don't exist yet.
+	var chunks = []
+	for chunk_key in keys:
+		if not _chunks.has(chunk_key):
+			return
+
+		chunks.append(_chunks[chunk_key])
 
 	# Create a new stitch, add it to the scene tree, and draw it.
 	var stitch = StitchChunk.instance()
 	add_child(stitch)
 	stitch.init()
+	_stitches[key] = stitch
 
 	# Show debug lines.
 	if _show_dual:
 		stitch.toggle_dual()
 
-	stitch.draw_face(_chunks[c0], _chunks[c1], axis)
-
-	_stitches[key] = stitch
-
-func add_edge_stitch(x, y, z, c0, c1, c2, c3, axis):
-	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + "e" + str(axis)
-	if _stitches.has(key):
-		return
-
-	# Do not create a stitch if the requisit chunks do not exist.
-	if not (_chunks.has(c0) and _chunks.has(c1) and _chunks.has(c2) and _chunks.has(c3)):
-		return
-
-	# Create a new stitch, add it to the scene tree, and draw it.
-	var stitch = StitchChunk.instance()
-	add_child(stitch)
-	stitch.init()
-
-	# Show debug lines.
-	if _show_dual:
-		stitch.toggle_dual()
-
-	stitch.draw_edge(_chunks[c0], _chunks[c1], _chunks[c2], _chunks[c3], axis)
-
-	_stitches[key] = stitch
-
-func add_corner_stitch(x, y, z, c0, c1, c2, c3, c4, c5, c6, c7):
-	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + "v"
-	if _stitches.has(key):
-		return
-
-	# Do not create a stitch if the requisit chunks do not exist.
-	if not (_chunks.has(c0) and _chunks.has(c1) and _chunks.has(c2) and _chunks.has(c3) and _chunks.has(c4) and _chunks.has(c5) and _chunks.has(c6) and _chunks.has(c7)):
-		return
-
-	# Create a new stitch, add it to the scene tree, and draw it.
-	var stitch = StitchChunk.instance()
-	add_child(stitch)
-	stitch.init()
-
-	# Show debug lines.
-	if _show_dual:
-		stitch.toggle_dual()
-	
-	stitch.draw_vert(_chunks[c0], _chunks[c1], _chunks[c2], _chunks[c3], _chunks[c4], _chunks[c5], _chunks[c6], _chunks[c7])
-
-	_stitches[key] = stitch
+	# Draw the stitch.
+	match keys.size():
+		2:
+			stitch.draw_face(chunks[0], chunks[1], axis)
+		4:
+			stitch.draw_edge(chunks[0], chunks[1], chunks[2], chunks[3], axis)
+		8:
+			stitch.draw_vert(chunks[0], chunks[1], chunks[2], chunks[3], chunks[4], chunks[5], chunks[6], chunks[7])
 
 func load_chunk(args):
 	# Retrieve arguments.
@@ -213,6 +169,9 @@ func load_chunk(args):
 
 	_chunks[key] = chunk
 	_unloaded_chunks.erase(key)
+	call_deferred("load_done", thread)
+
+func load_done(thread):
 	thread.wait_to_finish()
 
 func get_chunk_id(x, y, z):
@@ -224,6 +183,9 @@ func get_chunk_id(x, y, z):
 
 func get_chunk_key(x, y, z):
 	return str(int(x)) + "," + str(int(y)) + "," + str(int(z))
+
+func get_stitch_key(x, y, z, stitch_type, axis):
+	return get_chunk_key(x, y, z) + stitch_type + str(axis)
 
 func carve_terrain(intersection: Vector3):
 	# Find chunk.
