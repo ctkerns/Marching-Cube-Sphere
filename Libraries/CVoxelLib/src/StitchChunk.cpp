@@ -49,7 +49,6 @@ void StitchChunk::end() {
 	// Create collision shape.
 	if (vertex_count > 0) {
 		m_surface_shape->call_deferred("set_shape", m_surface_mesh->get_mesh()->create_trimesh_shape());
-		//m_surface_shape->set_shape(m_surface_mesh->get_mesh()->create_trimesh_shape());
 	} else {
 		m_surface_body->call_deferred("free");
 	}
