@@ -41,13 +41,12 @@ private:
 
 	const float threshold = 0.5;
 
-	void generate();
-
 public:
 	static void _register_methods();
 	void _init();
 
 	void init(int depth, Generator *generator);
+	void generate();
 	void draw();
 	Octree *get_tree();
 	void change_terrain(Vector3 intersection, float delta);

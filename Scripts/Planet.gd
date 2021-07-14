@@ -163,6 +163,7 @@ func load_done(thread, chunk, key):
 	# Instantiate the chunk.
 	add_child(chunk)
 	chunk.init(_chunk_depth, _generator)
+	chunk.generate()
 	
 	# Show debug lines.
 	if _show_borders:
@@ -171,7 +172,7 @@ func load_done(thread, chunk, key):
 		chunk.toggle_dual()
 	
 	chunk.draw()
-
+	
 	_chunks[key] = chunk
 	_unloaded_chunks.erase(key)
 
