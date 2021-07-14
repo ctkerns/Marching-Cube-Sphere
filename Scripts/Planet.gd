@@ -114,7 +114,7 @@ func add_stitch(x, y, z, keys, axis):
 			stitch_type = "v"
 
 	# Do not create a new stitch if the current one already exists.
-	var key = get_chunk_key(x, y, z) + stitch_type + str(axis)
+	var key = get_stitch_key(x, y, z, stitch_type, axis)
 	if _stitches.has(key):
 		return
 
@@ -178,6 +178,12 @@ func load_done(thread, chunk, key):
 
 	thread.wait_to_finish()
 
+func redraw_chunk(x, y, z):
+	var key = get_chunk_key(x, y, z)
+	var chunk = _chunks[key]
+
+	chunk.draw()
+
 func get_chunk_id(x, y, z):
 	var id_x = floor(x/_chunk_size + 0.5)
 	var id_y = floor(y/_chunk_size + 0.5)
@@ -198,7 +204,9 @@ func carve_terrain(intersection: Vector3):
 	var chunk = _chunks[key]
 	
 	chunk.change_terrain(intersection, -0.03)
-	chunk.draw()
+
+	# Redraw chunk and stitches.
+	redraw_chunk(id.x, id.y, id.z)
 
 func place_terrain(intersection: Vector3):
 	# Find chunk.
@@ -207,7 +215,9 @@ func place_terrain(intersection: Vector3):
 	var chunk = _chunks[key]
 	
 	chunk.change_terrain(intersection, 0.03)
-	chunk.draw()
+
+	# Redraw chunk and stitches.
+	redraw_chunk(id.x, id.y, id.z)
 	
 func _underwater(point: Vector3, caller):
 	# Find chunk.
