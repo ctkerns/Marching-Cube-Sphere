@@ -1,5 +1,5 @@
 /wiki/*
-/.vscode/settings
+/.vscode/*
 *.lnk
 *.ini
 *.obj
