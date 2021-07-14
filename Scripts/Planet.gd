@@ -32,7 +32,7 @@ func init(radius):
 	player.translation.y = _radius/1.5
 
 func _process(_delta):
-	load_world
+	load_world()
 	return
 	# Add chunks.
 	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
