@@ -103,6 +103,7 @@ func load_world():
 	if add_chunk(id.x, id.y, id.z):
 		return
 	
+	# Load all 26 neighboring chunks.
 	load_face(queue, id.x + 1, id.y, id.z, 1,  1,  0,  0)
 	load_face(queue, id.x - 1, id.y, id.z, 1, -1,  0,  0)
 	load_face(queue, id.x, id.y + 1, id.z, 1,  0,  1,  0)
@@ -153,6 +154,20 @@ func load_vert(queue, x, y, z, dist, d_x, d_y, d_z):
 	if add_chunk(x, y, z):
 		return
 
+	# Add stitches.
+	if d_x > 0:
+		if add_stitch(x - d_x, y, z, [get_chunk_key(x - d_x, y, z), get_chunk_key(x, y, z)], 0b100): return
+	else:
+		if add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x - d_x, y, z)], 0b100): return
+	if d_y > 0:
+		if add_stitch(x, y - d_y, z, [get_chunk_key(x, y - d_y, z), get_chunk_key(x, y, z)], 0b010): return
+	else:
+		add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x, y - d_y, z)], 0b010)
+	if d_z > 0:
+		if add_stitch(x, y, z - d_z, [get_chunk_key(x, y, z - d_z), get_chunk_key(x, y, z)], 0b001): return
+	else:
+		if add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x, y, z - d_z)], 0b001): return
+
 	# Use queue to recursively traverse the grid area.
 	queue.push_back(["vert", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
 
@@ -171,7 +186,7 @@ func load_edge(queue, x, y, z, dist, d_x, d_y, d_z):
 	
 	if add_chunk(x, y, z):
 		return
-
+	
 	# Use queue to recursively traverse the grid area.
 	queue.push_back(["edge", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
 
@@ -192,6 +207,20 @@ func load_face(queue, x, y, z, dist, d_x, d_y, d_z):
 	
 	if add_chunk(x, y, z):
 		return
+	
+	# Add stitches.
+	var axis
+	if d_x != 0: axis = 0b100
+	if d_y != 0: axis = 0b010
+	if d_z != 0: axis = 0b001
+
+	var pos = sign(d_x) + sign(d_y) + sign(d_z)
+	if pos == 1:
+		if add_stitch(x - d_x, y - d_y, z - d_z, [get_chunk_key(x - d_x, y - d_y, z - d_z), get_chunk_key(x, y, z)], axis):
+			return
+	else:
+		if add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x - d_x, y - d_y, z - d_z)], axis):
+			return
 
 	# Use queue to recursively traverse the grid area.
 	queue.push_back(["face", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
