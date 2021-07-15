@@ -319,6 +319,22 @@ func redraw_chunk(args):
 	redraw_stitch(get_stitch_key(x, y - 1, z, "f", 0b010))
 	redraw_stitch(get_stitch_key(x, y, z - 1, "f", 0b001))
 
+	redraw_stitch(get_stitch_key(x, y, z, "e", 0b100))
+	redraw_stitch(get_stitch_key(x, y, z, "e", 0b010))
+	redraw_stitch(get_stitch_key(x, y, z, "e", 0b001))
+
+	redraw_stitch(get_stitch_key(x, y,	   z - 1, "e", 0b100))
+	redraw_stitch(get_stitch_key(x, y - 1, z,	  "e", 0b100))
+	redraw_stitch(get_stitch_key(x, y - 1, z - 1, "e", 0b100))
+
+	redraw_stitch(get_stitch_key(x,		y, z - 1, "e", 0b010))
+	redraw_stitch(get_stitch_key(x - 1, y, z,	  "e", 0b010))
+	redraw_stitch(get_stitch_key(x - 1, y, z - 1, "e", 0b010))
+
+	redraw_stitch(get_stitch_key(x,		y - 1, z, "e", 0b001))
+	redraw_stitch(get_stitch_key(x - 1, y,	   z, "e", 0b001))
+	redraw_stitch(get_stitch_key(x - 1, y - 1, z, "e", 0b001))
+
 	redraw_stitch(get_stitch_key(x,		y,	   z,	  "v", null))
 	redraw_stitch(get_stitch_key(x,		y,	   z - 1, "v", null))
 	redraw_stitch(get_stitch_key(x,		y - 1, z,	  "v", null))
