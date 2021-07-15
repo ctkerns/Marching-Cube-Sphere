@@ -28,13 +28,13 @@ void Generator::set_radius(float radius) {
 }
 
 float Generator::sample(float x, float y, float z) {
-	float vol = m_noise->get_noise_3d(x, y, z)/3.0;
+	float vol = m_noise->get_noise_3d(x, y, z)*32.0/m_radius;
 
 	float magnitude = Vector3(x, y, z).length();
 
 	// Add sphere shape and randomness.
 	vol += 1.0 - magnitude/m_radius;
-	vol += (float(rand())/RAND_MAX*2.0 - 1.0)/256.0;
+	vol += (float(rand())/RAND_MAX*2.0 - 1.0)/(3.0*m_radius);
 
 	if (vol > 1.0)
 		vol = 1.0;

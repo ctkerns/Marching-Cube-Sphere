@@ -29,7 +29,7 @@ func init(radius):
 	_generator.set_radius(_radius)
 
 	# Set the players position so they don't get stuck.
-	player.translation.y = _radius/1.5
+	player.translation.y = _radius/1.9
 
 func _process(_delta):
 	load_world()
