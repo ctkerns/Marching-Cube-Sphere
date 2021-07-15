@@ -314,11 +314,29 @@ func load_stitch_done(thread, stitch, key):
 
 func redraw_chunk(args):
 	var thread = args[0]
-	var key = args[1]
+	var x = args[1]
+	var y = args[2]
+	var z = args[3]
 
-	var chunk = _chunks[key]
+	# Retrieve all 27 chunks in the surrounding 3x3 area.
+	var chunks = []
+	for i in range(2):
+		chunks.append([])
+		for j in range(2):
+			chunks[i].append([])
+			for k in range(2):
+				var key = get_chunk_key(x - 1 + i, y - 1 + j, z - 1 + k)
 
-	chunk.draw()
+				# To make it simple, just don't redraw unless enough chunks have loaded.
+				if not _chunks.has(key):
+					call_deferred("redraw_done", thread)
+					return
+					
+				chunks[i][j].append(_chunks[key])
+	
+	# Redraw center chunk.
+	chunks[1][1][1].draw()
+
 	call_deferred("redraw_done", thread)
 
 func redraw_done(thread):
@@ -349,7 +367,7 @@ func carve_terrain(intersection: Vector3):
 
 	# Redraw chunk and stitches.
 	if not _draw_thread.is_active():
-		_draw_thread.start(self, "redraw_chunk", [_draw_thread, key, intersection])
+		_draw_thread.start(self, "redraw_chunk", [_draw_thread, id.x, id.y, id.z])
 
 func place_terrain(intersection: Vector3):
 	# Find chunk.
@@ -361,7 +379,7 @@ func place_terrain(intersection: Vector3):
 
 	# Redraw chunk and stitches.
 	if not _draw_thread.is_active():
-		_draw_thread.start(self, "redraw_chunk", [_draw_thread, key])
+		_draw_thread.start(self, "redraw_chunk", [_draw_thread, id.x, id.y, id.z])
 	
 func _underwater(point: Vector3, caller):
 	# Find chunk.
