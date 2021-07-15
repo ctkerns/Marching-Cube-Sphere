@@ -3,6 +3,7 @@ extends Spatial
 var _chunks = {}
 var _stitches = {}
 var _unloaded_chunks = {}
+var _unloaded_stitches = {}
 
 onready var _thread = Thread.new()
 onready var _draw_thread = Thread.new()
@@ -212,51 +213,6 @@ func add_chunk(x, y, z):
 	
 	return true
 
-func add_stitch(x, y, z, keys, axis):
-	var stitch_type
-	match keys.size():
-		2:
-			stitch_type = "f"
-		4:
-			stitch_type = "e"
-		8:
-			stitch_type = "v"
-
-	# Do not create a new stitch if the current one already exists.
-	var key = get_stitch_key(x, y, z, stitch_type, axis)
-	if _stitches.has(key):
-		return
-
-	# Get chunks, but do not create a stitch if the chunks don't exist yet.
-	var chunks = []
-	for chunk_key in keys:
-		if not _chunks.has(chunk_key):
-			return
-
-		chunks.append(_chunks[chunk_key])
-
-	# Create a new stitch, add it to the scene tree, and draw it.
-	var stitch = StitchChunk.instance()
-	add_child(stitch)
-	stitch.init()
-	_stitches[key] = stitch
-
-	# Show debug lines.
-	if _show_dual:
-		stitch.toggle_dual()
-
-	# Draw the stitch.
-	match keys.size():
-		2:
-			stitch.draw_face(chunks[0], chunks[1], axis)
-		4:
-			stitch.draw_edge(chunks[0], chunks[1], chunks[2], chunks[3], axis)
-		8:
-			stitch.draw_vert(
-				chunks[0], chunks[1], chunks[2], chunks[3],
-				chunks[4], chunks[5], chunks[6], chunks[7]
-			)
-
 func load_chunk(args):
 	# Retrieve arguments.
 	var thread = args[0]
@@ -276,7 +232,7 @@ func load_chunk(args):
 	chunk.draw()
 
 	call_deferred("load_done", thread, chunk, key)
-
+	
 func load_done(thread, chunk, key):
 	_chunks[key] = chunk
 	_unloaded_chunks.erase(key)
@@ -286,6 +242,73 @@ func load_done(thread, chunk, key):
 		chunk.toggle_borders()
 	if _show_dual:
 		chunk.toggle_dual()
+
+	thread.wait_to_finish()
+
+# If stitch is still being loaded, return true.
+func add_stitch(x, y, z, keys, axis):
+	var stitch_type
+	match keys.size():
+		2:
+			stitch_type = "f"
+		4:
+			stitch_type = "e"
+		8:
+			stitch_type = "v"
+
+	# Do not create a new stitch if the current one already exists.
+	var key = get_stitch_key(x, y, z, stitch_type, axis)
+	if _stitches.has(key):
+		return false
+
+	if _unloaded_stitches.has(key):
+		return true
+
+	# Get chunks, but do not create a stitch if the chunks don't exist yet.
+	var chunks = []
+	for chunk_key in keys:
+		if not _chunks.has(chunk_key):
+			return true
+
+		chunks.append(_chunks[chunk_key])
+
+	# Load stitches in a separate thread.
+	if not _thread.is_active():
+		_thread.start(self, "load_stitch", [_thread, key, chunks, axis])
+
+func load_stitch(args):
+	# Retrieve args.
+	var thread = args[0]
+	var key = args[1]
+	var chunks = args[2]
+	var axis = args[3]
+
+	# Create a new stitch, add it to the scene tree, and draw it.
+	var stitch = StitchChunk.instance()
+	add_child(stitch)
+	stitch.init()
+
+	# Draw the stitch.
+	match chunks.size():
+		2:
+			stitch.draw_face(chunks[0], chunks[1], axis)
+		4:
+			stitch.draw_edge(chunks[0], chunks[1], chunks[2], chunks[3], axis)
+		8:
+			stitch.draw_vert(
+				chunks[0], chunks[1], chunks[2], chunks[3],
+				chunks[4], chunks[5], chunks[6], chunks[7]
+			)
+	
+	call_deferred("load_stitch_done", thread, stitch, key)
+
+func load_stitch_done(thread, stitch, key):
+	_stitches[key] = stitch
+	_unloaded_stitches.erase(key)
+
+	# Show debug lines.
+	if _show_dual:
+		stitch.toggle_dual()
 
 	thread.wait_to_finish()
 
