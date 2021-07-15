@@ -283,22 +283,13 @@ func load_stitch(args):
 	var chunks = args[2]
 	var axis = args[3]
 
-	# Create a new stitch, add it to the scene tree, and draw it.
+	# Create a new stitch and add it to the scene tree.
 	var stitch = StitchChunk.instance()
 	add_child(stitch)
-	stitch.init()
 
-	# Draw the stitch.
-	match chunks.size():
-		2:
-			stitch.draw_face(chunks[0], chunks[1], axis)
-		4:
-			stitch.draw_edge(chunks[0], chunks[1], chunks[2], chunks[3], axis)
-		8:
-			stitch.draw_vert(
-				chunks[0], chunks[1], chunks[2], chunks[3],
-				chunks[4], chunks[5], chunks[6], chunks[7]
-			)
+	# Initialize and draw the stitch.
+	stitch.init(chunks, axis)
+	stitch.draw()
 	
 	call_deferred("load_stitch_done", thread, stitch, key)
 
@@ -317,27 +308,22 @@ func redraw_chunk(args):
 	var x = args[1]
 	var y = args[2]
 	var z = args[3]
-
-	# Retrieve all 27 chunks in the surrounding 3x3 area.
-	var chunks = []
-	for i in range(2):
-		chunks.append([])
-		for j in range(2):
-			chunks[i].append([])
-			for k in range(2):
-				var key = get_chunk_key(x - 1 + i, y - 1 + j, z - 1 + k)
-
-				# To make it simple, just don't redraw unless enough chunks have loaded.
-				if not _chunks.has(key):
-					call_deferred("redraw_done", thread)
-					return
-					
-				chunks[i][j].append(_chunks[key])
 	
 	# Redraw center chunk.
-	chunks[1][1][1].draw()
+	_chunks[get_chunk_key(x, y, z)].draw()
+
+	redraw_stitch(get_stitch_key(x, y, z, "f", 0b100))
+	redraw_stitch(get_stitch_key(x, y, z, "f", 0b010))
+	redraw_stitch(get_stitch_key(x, y, z, "f", 0b001))
+	redraw_stitch(get_stitch_key(x - 1, y, z, "f", 0b100))
+	redraw_stitch(get_stitch_key(x, y - 1, z, "f", 0b010))
+	redraw_stitch(get_stitch_key(x, y, z - 1, "f", 0b001))
 
 	call_deferred("redraw_done", thread)
+
+func redraw_stitch(key):
+	if _stitches.has(key):
+		_stitches[key].draw()
 
 func redraw_done(thread):
 	thread.wait_to_finish()

@@ -1,10 +1,8 @@
 #include "StitchChunk.hpp"
 
 void StitchChunk::_register_methods() {
-	godot::register_method("draw_face", &StitchChunk::draw_face);
-	godot::register_method("draw_edge", &StitchChunk::draw_edge);
-	godot::register_method("draw_vert", &StitchChunk::draw_vert);
 	godot::register_method("init", &StitchChunk::init);
+	godot::register_method("draw", &StitchChunk::draw);
 	godot::register_method("toggle_dual", &StitchChunk::toggle_dual);
 }
 
@@ -15,7 +13,10 @@ void StitchChunk::_init() {
 	m_fluid = SurfaceTool::_new();
 }
 
-void StitchChunk::init() {
+void StitchChunk::init(Array chunks, int axis) {
+	m_chunks = chunks;
+	m_axis = axis;
+
 	// Grab child nodes.
 	m_dual_mesh	   = static_cast<MeshInstance*>(get_node("Dual"));
 	m_surface_mesh = static_cast<MeshInstance*>(get_node("Surface"));
@@ -47,31 +48,33 @@ void StitchChunk::end() {
 	m_fluid_mesh->set_mesh(m_fluid->commit());
 
 	// Create collision shape.
-	if (vertex_count > 0) {
-		m_surface_shape->call_deferred("set_shape", m_surface_mesh->get_mesh()->create_trimesh_shape());
-	} else {
-		m_surface_body->call_deferred("free");
+	if (m_surface_body != nullptr) {
+		if (vertex_count > 0) {
+			m_surface_shape->call_deferred("set_shape", m_surface_mesh->get_mesh()->create_trimesh_shape());
+		} else {
+			m_surface_body->call_deferred("free");
+			m_surface_body = nullptr;
+		}
 	}
 }
 
-void StitchChunk::draw_face(OctreeChunk *c0, OctreeChunk *c1, int axis) {
+void StitchChunk::draw() {
 	begin();
-	face_proc(c0, c1, 0b1, 0b1, axis);
-	end();
-}
-
-void StitchChunk::draw_edge(OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3, int axis) {
-	begin();
-	edge_proc(c0, c1, c2, c3, 0b1, 0b1, 0b1, 0b1, axis);
-	end();
-}
-
-void StitchChunk::draw_vert(
-	OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
-	OctreeChunk *c4, OctreeChunk *c5, OctreeChunk *c6, OctreeChunk *c7
-) {
-	begin();
-	vert_proc(c0, c1, c2, c3, c4, c5, c6, c7, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1);
+	switch(m_chunks.size()) {
+		case 8:
+			vert_proc(
+				m_chunks[0], m_chunks[1], m_chunks[2], m_chunks[3],
+				m_chunks[4], m_chunks[5], m_chunks[6], m_chunks[7],
+				0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1
+			);
+			break;
+		case 4:
+			edge_proc(m_chunks[0], m_chunks[1], m_chunks[2], m_chunks[3], 0b1, 0b1, 0b1, 0b1, m_axis);
+			break;
+		case 2:
+			face_proc(m_chunks[0], m_chunks[1], 0b1, 0b1, m_axis);
+			break;
+	};
 	end();
 }
 

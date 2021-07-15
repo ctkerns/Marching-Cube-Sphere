@@ -11,6 +11,7 @@
 #include "OctreeChunk.hpp"
 
 using godot::Spatial;
+using godot::Array;
 using godot::Vector3;
 using godot::SurfaceTool;
 using godot::Mesh;
@@ -32,6 +33,9 @@ private:
 	SurfaceTool *m_surface;
 	SurfaceTool *m_fluid;
 
+	Array m_chunks;
+	int m_axis;
+
 	const int plane_x[4] = {0b000, 0b001, 0b010, 0b011};
 	const int plane_y[4] = {0b000, 0b001, 0b100, 0b101};
 	const int plane_z[4] = {0b000, 0b010, 0b100, 0b110};
@@ -46,13 +50,8 @@ public:
 	void static _register_methods();
 	void _init();
 
-	void init();
-	void draw_face(OctreeChunk *c0, OctreeChunk *c1, int axis);
-	void draw_edge(OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3, int axis);
-	void draw_vert(
-		OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
-		OctreeChunk *c4, OctreeChunk *c5, OctreeChunk *c6, OctreeChunk *c7
-	);
+	void init(Array chunks, int axis);
+	void draw();
 
 	void StitchChunk::face_proc(
 		OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, int axis
