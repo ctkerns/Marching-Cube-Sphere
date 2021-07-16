@@ -34,54 +34,6 @@ func init(radius):
 
 func _process(_delta):
 	load_world()
-	return
-	# Add chunks.
-	var id = get_chunk_id(player.translation.x, player.translation.y, player.translation.z)
-
-	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
-		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
-			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
-				add_chunk(i, j, k)
-	
-	# Add stitches.
-	for i in range(id.x - _render_distance, id.x + _render_distance + 1):
-		for j in range(id.y - _render_distance, id.y + _render_distance + 1):
-			for k in range(id.z - _render_distance, id.z + _render_distance + 1):
-				add_stitch(i, j, k, [
-					get_chunk_key(i,	 j,		k	 ),
-					get_chunk_key(i,	 j,		k + 1),
-					get_chunk_key(i,	 j + 1, k	 ),
-					get_chunk_key(i,	 j + 1, k + 1),
-					get_chunk_key(i + 1, j, 	k	 ),
-					get_chunk_key(i + 1, j, 	k + 1),
-					get_chunk_key(i + 1, j + 1, k	 ),
-					get_chunk_key(i + 1, j + 1, k + 1)
-				], null)
-
-				add_stitch(i, j, k, [
-					get_chunk_key(i,	 j,	    k),
-					get_chunk_key(i,	 j + 1, k),
-					get_chunk_key(i + 1, j,		k),
-					get_chunk_key(i + 1, j + 1, k)
-				], 1)
-
-				add_stitch(i, j, k, [
-					get_chunk_key(i, 	 j, k	 ),
-					get_chunk_key(i, 	 j, k + 1),
-					get_chunk_key(i + 1, j, k	 ),
-					get_chunk_key(i + 1, j, k + 1)
-				], 2)
-
-				add_stitch(i, j, k, [
-					get_chunk_key(i, j,		k	 ),
-					get_chunk_key(i, j,		k + 1),
-					get_chunk_key(i, j + 1, k	 ),
-					get_chunk_key(i, j + 1, k + 1)
-				], 4)
-
-				add_stitch(i, j, k, [get_chunk_key(i, j, k), get_chunk_key(i, j, k + 1)], 1)
-				add_stitch(i, j, k, [get_chunk_key(i, j, k), get_chunk_key(i, j + 1, k)], 2)
-				add_stitch(i, j, k, [get_chunk_key(i, j, k), get_chunk_key(i + 1, j, k)], 4)
 
 func _input(event):
 	if event.is_action_pressed("toggle_borders"):
@@ -104,49 +56,49 @@ func load_world():
 		return
 	
 	# Load all 26 neighboring chunks.
-	load_face(queue, id.x + 1, id.y, id.z, 1,  1,  0,  0)
-	load_face(queue, id.x - 1, id.y, id.z, 1, -1,  0,  0)
-	load_face(queue, id.x, id.y + 1, id.z, 1,  0,  1,  0)
-	load_face(queue, id.x, id.y - 1, id.z, 1,  0, -1,  0)
-	load_face(queue, id.x, id.y, id.z + 1, 1,  0,  0,  1)
-	load_face(queue, id.x, id.y, id.z - 1, 1,  0,  0, -1)
+	load_face(queue, id.x + 1, id.y, id.z,  1,  0,  0, 0b100, 1)
+	load_face(queue, id.x - 1, id.y, id.z, -1,  0,  0, 0b100, 1)
+	load_face(queue, id.x, id.y + 1, id.z,  0,  1,  0, 0b010, 1)
+	load_face(queue, id.x, id.y - 1, id.z,  0, -1,  0, 0b010, 1)
+	load_face(queue, id.x, id.y, id.z + 1,  0,  0,  1, 0b001, 1)
+	load_face(queue, id.x, id.y, id.z - 1,  0,  0, -1, 0b001, 1)
 
-	load_edge(queue, id.x, id.y + 1, id.z + 1, 1, 0,  1,  1)
-	load_edge(queue, id.x, id.y + 1, id.z - 1, 1, 0,  1, -1)
-	load_edge(queue, id.x, id.y - 1, id.z + 1, 1, 0, -1,  1)
-	load_edge(queue, id.x, id.y - 1, id.z - 1, 1, 0, -1, -1)
+	load_edge(queue, id.x, id.y + 1, id.z + 1, 0,  1,  1, 0b100, 1)
+	load_edge(queue, id.x, id.y + 1, id.z - 1, 0,  1, -1, 0b100, 1)
+	load_edge(queue, id.x, id.y - 1, id.z + 1, 0, -1,  1, 0b100, 1)
+	load_edge(queue, id.x, id.y - 1, id.z - 1, 0, -1, -1, 0b100, 1)
 
-	load_edge(queue, id.x + 1, id.y, id.z + 1, 1,  1, 0,  1)
-	load_edge(queue, id.x + 1, id.y, id.z - 1, 1,  1, 0, -1)
-	load_edge(queue, id.x - 1, id.y, id.z + 1, 1, -1, 0,  1)
-	load_edge(queue, id.x - 1, id.y, id.z - 1, 1, -1, 0, -1)
+	load_edge(queue, id.x + 1, id.y, id.z + 1,  1, 0,  1, 0b010, 1)
+	load_edge(queue, id.x + 1, id.y, id.z - 1,  1, 0, -1, 0b010, 1)
+	load_edge(queue, id.x - 1, id.y, id.z + 1, -1, 0,  1, 0b010, 1)
+	load_edge(queue, id.x - 1, id.y, id.z - 1, -1, 0, -1, 0b010, 1)
 
-	load_edge(queue, id.x + 1, id.y + 1, id.z, 1,  1,  1, 0)
-	load_edge(queue, id.x + 1, id.y - 1, id.z, 1,  1, -1, 0)
-	load_edge(queue, id.x - 1, id.y + 1, id.z, 1, -1,  1, 0)
-	load_edge(queue, id.x - 1, id.y - 1, id.z, 1, -1, -1, 0)
+	load_edge(queue, id.x + 1, id.y + 1, id.z,  1,  1, 0, 0b001, 1)
+	load_edge(queue, id.x + 1, id.y - 1, id.z,  1, -1, 0, 0b001, 1)
+	load_edge(queue, id.x - 1, id.y + 1, id.z, -1,  1, 0, 0b001, 1)
+	load_edge(queue, id.x - 1, id.y - 1, id.z, -1, -1, 0, 0b001, 1)
 
-	load_vert(queue, id.x + 1, id.y + 1, id.z + 1, 1,  1,  1,  1)
-	load_vert(queue, id.x + 1, id.y + 1, id.z - 1, 1,  1,  1, -1)
-	load_vert(queue, id.x + 1, id.y - 1, id.z + 1, 1,  1, -1,  1)
-	load_vert(queue, id.x + 1, id.y - 1, id.z - 1, 1,  1, -1, -1)
-	load_vert(queue, id.x - 1, id.y + 1, id.z + 1, 1, -1,  1,  1)
-	load_vert(queue, id.x - 1, id.y + 1, id.z - 1, 1, -1,  1, -1)
-	load_vert(queue, id.x - 1, id.y - 1, id.z + 1, 1, -1, -1,  1)
-	load_vert(queue, id.x - 1, id.y - 1, id.z - 1, 1, -1, -1, -1)
+	load_vert(queue, id.x + 1, id.y + 1, id.z + 1,  1,  1,  1, 1)
+	load_vert(queue, id.x + 1, id.y + 1, id.z - 1,  1,  1, -1, 1)
+	load_vert(queue, id.x + 1, id.y - 1, id.z + 1,  1, -1,  1, 1)
+	load_vert(queue, id.x + 1, id.y - 1, id.z - 1,  1, -1, -1, 1)
+	load_vert(queue, id.x - 1, id.y + 1, id.z + 1, -1,  1,  1, 1)
+	load_vert(queue, id.x - 1, id.y + 1, id.z - 1, -1,  1, -1, 1)
+	load_vert(queue, id.x - 1, id.y - 1, id.z + 1, -1, -1,  1, 1)
+	load_vert(queue, id.x - 1, id.y - 1, id.z - 1, -1, -1, -1, 1)
 
 	# Use queue to recursively traverse the grid area.
 	while not queue.empty():
 		var call = queue.pop_front()
 		match call[0]:
 			"face":
-				load_face(queue, call[1], call[2], call[3], call[4], call[5], call[6], call[7])
+				load_face(queue, call[1], call[2], call[3], call[4], call[5], call[6], call[7], call[8])
 			"edge":
-				load_edge(queue, call[1], call[2], call[3], call[4], call[5], call[6], call[7])
+				load_edge(queue, call[1], call[2], call[3], call[4], call[5], call[6], call[7], call[8])
 			"vert":
 				load_vert(queue, call[1], call[2], call[3], call[4], call[5], call[6], call[7])
 
-func load_vert(queue, x, y, z, dist, d_x, d_y, d_z):
+func load_vert(queue, x, y, z, d_x, d_y, d_z, dist):
 	# Stop rendering past a set distance.
 	if dist > _render_distance:
 		return
@@ -155,52 +107,50 @@ func load_vert(queue, x, y, z, dist, d_x, d_y, d_z):
 		return
 
 	# Add stitches.
-	if d_x > 0:
-		if add_stitch(x - d_x, y, z, [get_chunk_key(x - d_x, y, z), get_chunk_key(x, y, z)], 0b100): return
-	else:
-		if add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x - d_x, y, z)], 0b100): return
-	if d_y > 0:
-		if add_stitch(x, y - d_y, z, [get_chunk_key(x, y - d_y, z), get_chunk_key(x, y, z)], 0b010): return
-	else:
-		add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x, y - d_y, z)], 0b010)
-	if d_z > 0:
-		if add_stitch(x, y, z - d_z, [get_chunk_key(x, y, z - d_z), get_chunk_key(x, y, z)], 0b001): return
-	else:
-		if add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x, y, z - d_z)], 0b001): return
+	if add_stitch(x, y, z, x - d_x, y - d_y, z - d_z, "v", null): return
+
+	if add_stitch(x, y, z, x, y - d_y, z - d_z, "e", 0b100): return
+	if add_stitch(x, y, z, x - d_x, y, z - d_z, "e", 0b010): return
+	if add_stitch(x, y, z, x - d_x, y - d_y, z, "e", 0b001): return
+
+	if add_stitch(x, y, z, x - d_x, y, z, "f", 0b100): return
+	if add_stitch(x, y, z, x, y - d_y, z, "f", 0b010): return
+	if add_stitch(x, y, z, x, y, z - d_z, "f", 0b001): return
 
 	# Use queue to recursively traverse the grid area.
-	queue.push_back(["vert", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
+	queue.push_back(["vert", x + d_x, y + d_y, z + d_z, d_x, d_y, d_z, dist + 1])
 
-	queue.push_back(["edge", x, y + d_y, z + d_z, dist + 1, 0, d_y, d_z])
-	queue.push_back(["edge", x + d_x, y, z + d_z, dist + 1, d_x, 0, d_z])
-	queue.push_back(["edge", x + d_x, y + d_y, z, dist + 1, d_x, d_y, 0])
-
-	queue.push_back(["face", x + d_x, y, z, dist + 1, d_x, 0, 0])
-	queue.push_back(["face", x, y + d_y, z, dist + 1, 0, d_y, 0])
-	queue.push_back(["face", x, y, z + d_z, dist + 1, 0, 0, d_z])
-
-func load_edge(queue, x, y, z, dist, d_x, d_y, d_z):
+func load_edge(queue, x, y, z, d_x, d_y, d_z, axis, dist):
 	# Stop rendering past a set distance.
 	if dist > _render_distance:
 		return
 	
 	if add_chunk(x, y, z):
 		return
+
+	# Add stitches.
+	if add_stitch(x, y, z, x - d_x, y - d_y, z - d_z, "e", axis): return
 	
 	# Use queue to recursively traverse the grid area.
-	queue.push_back(["edge", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
-
 	if d_x == 0:
-		queue.push_back(["face", x, y + d_y, z, dist + 1, d_x, d_y, 0])
-		queue.push_back(["face", x, y, z + d_z, dist + 1, d_x, 0, d_z])
+		if add_stitch(x, y, z, x, y - d_y, z, "f", 0b010): return
+		if add_stitch(x, y, z, x, y, z - d_z, "f", 0b001): return
+		queue.push_back(["vert", x + 1, y + d_y, z + d_z,  1, d_y, d_z, dist + 1])
+		queue.push_back(["vert", x - 1, y + d_y, z + d_z, -1, d_y, d_z, dist + 1])
 	elif d_y == 0:
-		queue.push_back(["face", x + d_x, y, z, dist + 1, d_x, d_y, 0])
-		queue.push_back(["face", x, y, z + d_z, dist + 1, 0, d_y, d_z])
+		if add_stitch(x, y, z, x - d_x, y, z, "f", 0b100): return
+		if add_stitch(x, y, z, x, y, z - d_z, "f", 0b001): return
+		queue.push_back(["vert", x + d_x, y + 1, z + d_z, d_x,  1, d_z, dist + 1])
+		queue.push_back(["vert", x + d_x, y - 1, z + d_z, d_x, -1, d_z, dist + 1])
 	elif d_z == 0:
-		queue.push_back(["face", x + d_x, y, z, dist + 1, d_x, 0, d_z])
-		queue.push_back(["face", x, y + d_y, z, dist + 1, 0, d_y, d_z])
+		if add_stitch(x, y, z, x - d_x, y, z, "f", 0b100): return
+		if add_stitch(x, y, z, x, y - d_y, z, "f", 0b010): return
+		queue.push_back(["vert", x + d_x, y + d_y, z + 1, d_x, d_y,  1, dist + 1])
+		queue.push_back(["vert", x + d_x, y + d_y, z - 1, d_x, d_y, -1, dist + 1])
 
-func load_face(queue, x, y, z, dist, d_x, d_y, d_z):
+	queue.push_back(["edge", x + d_x, y + d_y, z + d_z, d_x, d_y, d_z, axis, dist + 1])
+
+func load_face(queue, x, y, z, d_x, d_y, d_z, axis, dist):
 	# Stop rendering past a set distance.
 	if dist > _render_distance:
 		return
@@ -208,22 +158,44 @@ func load_face(queue, x, y, z, dist, d_x, d_y, d_z):
 	if add_chunk(x, y, z):
 		return
 	
-	# Add stitches.
-	var axis
-	if d_x != 0: axis = 0b100
-	if d_y != 0: axis = 0b010
-	if d_z != 0: axis = 0b001
-
-	var pos = sign(d_x) + sign(d_y) + sign(d_z)
-	if pos == 1:
-		if add_stitch(x - d_x, y - d_y, z - d_z, [get_chunk_key(x - d_x, y - d_y, z - d_z), get_chunk_key(x, y, z)], axis):
-			return
-	else:
-		if add_stitch(x, y, z, [get_chunk_key(x, y, z), get_chunk_key(x - d_x, y - d_y, z - d_z)], axis):
-			return
-
+	# Add stitch.
+	if add_stitch(x, y, z, x - d_x, y - d_y, z - d_z, "f", axis):
+		return
+	
 	# Use queue to recursively traverse the grid area.
-	queue.push_back(["face", x + d_x, y + d_y, z + d_z, dist + 1, d_x, d_y, d_z])
+	queue.push_back(["face", x + d_x, y + d_y, z + d_z, d_x, d_y, d_z, axis, dist + 1])
+
+	match axis:
+		0b100:
+			queue.push_back(["edge", x + d_x, y + 1, z,		d_x,  1,  0, 0b001, dist + 1])
+			queue.push_back(["edge", x + d_x, y - 1, z,		d_x, -1,  0, 0b001, dist + 1])
+			queue.push_back(["edge", x + d_x, y,	 z + 1, d_x,  0,  1, 0b010, dist + 1])
+			queue.push_back(["edge", x + d_x, y,	 z - 1, d_x,  0, -1, 0b010, dist + 1])
+
+			queue.push_back(["vert", x + d_x, y - 1, z - 1,	d_x, -1, -1, dist + 1])
+			queue.push_back(["vert", x + d_x, y - 1, z + 1,	d_x, -1,  1, dist + 1])
+			queue.push_back(["vert", x + d_x, y + 1, z - 1, d_x,  1, -1, dist + 1])
+			queue.push_back(["vert", x + d_x, y + 1, z + 1, d_x,  1,  1, dist + 1])
+		0b010:
+			queue.push_back(["edge", x + 1, y + d_y, z,		 1, d_y,  0, 0b001, dist + 1])
+			queue.push_back(["edge", x - 1, y + d_y, z,		-1, d_y,  0, 0b001, dist + 1])
+			queue.push_back(["edge", x,		y + d_y, z + 1,  0, d_y,  1, 0b100, dist + 1])
+			queue.push_back(["edge", x,		y + d_y, z - 1,  0, d_y, -1, 0b100, dist + 1])
+
+			queue.push_back(["vert", x - 1, y - d_y, z + 1,	-1, d_y, -1, dist + 1])
+			queue.push_back(["vert", x - 1, y + d_y, z + 1,	-1, d_y,  1, dist + 1])
+			queue.push_back(["vert", x + 1,	y - d_y, z + 1,  1, d_y, -1, dist + 1])
+			queue.push_back(["vert", x + 1,	y + d_y, z + 1,  1, d_y,  1, dist + 1])
+		0b001:
+			queue.push_back(["edge", x + 1, y,	   z + d_z,  1,  0, d_z, 0b010, dist + 1])
+			queue.push_back(["edge", x - 1, y,	   z + d_z, -1,  0, d_z, 0b010, dist + 1])
+			queue.push_back(["edge", x,		y + 1, z + d_z,  0,  1, d_z, 0b100, dist + 1])
+			queue.push_back(["edge", x,		y - 1, z + d_z,  0, -1, d_z, 0b100, dist + 1])
+
+			queue.push_back(["vert", x - 1, y - 1, z + d_z, -1, -1, d_z, dist + 1])
+			queue.push_back(["vert", x - 1, y + 1, z + d_z, -1,  1, d_z, dist + 1])
+			queue.push_back(["vert", x + 1,	y - 1, z + d_z,  1, -1, d_z, dist + 1])
+			queue.push_back(["vert", x + 1,	y + 1, z + d_z,  1,  1, d_z, dist + 1])
 
 # If chunk is still being loaded, return true.
 func add_chunk(x, y, z):
@@ -275,23 +247,62 @@ func load_done(thread, chunk, key):
 	thread.wait_to_finish()
 
 # If stitch is still being loaded, return true.
-func add_stitch(x, y, z, keys, axis):
-	var stitch_type
-	match keys.size():
-		2:
-			stitch_type = "f"
-		4:
-			stitch_type = "e"
-		8:
-			stitch_type = "v"
-
+func add_stitch(x1, y1, z1, x2, y2, z2, stitch_type, axis):
 	# Do not create a new stitch if the current one already exists.
-	var key = get_stitch_key(x, y, z, stitch_type, axis)
+	var key = get_stitch_key(x1, y1, z1, x2, y2, z2)
 	if _stitches.has(key):
 		return false
 
 	if _unloaded_stitches.has(key):
 		return true
+
+	# Find midpoint.
+	var m_x = (x1 + x2)/2.0
+	var m_y = (y1 + y2)/2.0
+	var m_z = (z1 + z2)/2.0
+
+	var keys = []
+	match(stitch_type):
+		"f":
+			keys.resize(2)
+			match axis:
+				0b100:
+					keys[0] = get_chunk_key(m_x - 0.5, m_y, m_z)
+					keys[1] = get_chunk_key(m_x + 0.5, m_y, m_z)
+				0b010:
+					keys[0] = get_chunk_key(m_x, m_y - 0.5, m_z)
+					keys[1] = get_chunk_key(m_x, m_y + 0.5, m_z)
+				0b001:
+					keys[0] = get_chunk_key(m_x, m_y, m_z - 0.5)
+					keys[1] = get_chunk_key(m_x, m_y, m_z + 0.5)
+		"e":
+			keys.resize(4)
+			match axis:
+				0b100:
+					keys[0] = get_chunk_key(m_x, m_y - 0.5, m_z - 0.5)
+					keys[1] = get_chunk_key(m_x, m_y - 0.5, m_z + 0.5)
+					keys[2] = get_chunk_key(m_x, m_y + 0.5, m_z - 0.5)
+					keys[3] = get_chunk_key(m_x, m_y + 0.5, m_z + 0.5)
+				0b010:
+					keys[0] = get_chunk_key(m_x - 0.5, m_y, m_z - 0.5)
+					keys[1] = get_chunk_key(m_x - 0.5, m_y, m_z + 0.5)
+					keys[2] = get_chunk_key(m_x + 0.5, m_y, m_z - 0.5)
+					keys[3] = get_chunk_key(m_x + 0.5, m_y, m_z + 0.5)
+				0b001:
+					keys[0] = get_chunk_key(m_x - 0.5, m_y - 0.5, m_z)
+					keys[1] = get_chunk_key(m_x - 0.5, m_y + 0.5, m_z)
+					keys[2] = get_chunk_key(m_x + 0.5, m_y - 0.5, m_z)
+					keys[3] = get_chunk_key(m_x + 0.5, m_y + 0.5, m_z)
+		"v":
+			keys.resize(8)
+			keys[0] = get_chunk_key(m_x - 0.5, m_y - 0.5, m_z - 0.5)
+			keys[1] = get_chunk_key(m_x - 0.5, m_y - 0.5, m_z + 0.5)
+			keys[2] = get_chunk_key(m_x - 0.5, m_y + 0.5, m_z - 0.5)
+			keys[3] = get_chunk_key(m_x - 0.5, m_y + 0.5, m_z + 0.5)
+			keys[4] = get_chunk_key(m_x + 0.5, m_y - 0.5, m_z - 0.5)
+			keys[5] = get_chunk_key(m_x + 0.5, m_y - 0.5, m_z + 0.5)
+			keys[6] = get_chunk_key(m_x + 0.5, m_y + 0.5, m_z - 0.5)
+			keys[7] = get_chunk_key(m_x + 0.5, m_y + 0.5, m_z + 0.5)
 
 	# Get chunks, but do not create a stitch if the chunks don't exist yet.
 	var chunks = []
@@ -341,37 +352,36 @@ func redraw_chunk(args):
 	# Redraw center chunk.
 	_chunks[get_chunk_key(x, y, z)].draw()
 
-	redraw_stitch(get_stitch_key(x, y, z, "f", 0b100))
-	redraw_stitch(get_stitch_key(x, y, z, "f", 0b010))
-	redraw_stitch(get_stitch_key(x, y, z, "f", 0b001))
-	redraw_stitch(get_stitch_key(x - 1, y, z, "f", 0b100))
-	redraw_stitch(get_stitch_key(x, y - 1, z, "f", 0b010))
-	redraw_stitch(get_stitch_key(x, y, z - 1, "f", 0b001))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y,		z))
+	redraw_stitch(get_stitch_key(x, y, z, x,	 y + 1, z))
+	redraw_stitch(get_stitch_key(x, y, z, x,	 y,		z + 1))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y,		z))
+	redraw_stitch(get_stitch_key(x, y, z, x,	 y - 1, z))
+	redraw_stitch(get_stitch_key(x, y, z, x,	 y,		z - 1))
 
-	redraw_stitch(get_stitch_key(x, y, z, "e", 0b100))
-	redraw_stitch(get_stitch_key(x, y, z, "e", 0b010))
-	redraw_stitch(get_stitch_key(x, y, z, "e", 0b001))
+	redraw_stitch(get_stitch_key(x, y, z, x, y - 1, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x, y - 1, z + 1))
+	redraw_stitch(get_stitch_key(x, y, z, x, y + 1, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x, y + 1, z + 1))
 
-	redraw_stitch(get_stitch_key(x, y,	   z - 1, "e", 0b100))
-	redraw_stitch(get_stitch_key(x, y - 1, z,	  "e", 0b100))
-	redraw_stitch(get_stitch_key(x, y - 1, z - 1, "e", 0b100))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y, z + 1))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y, z + 1))
 
-	redraw_stitch(get_stitch_key(x,		y, z - 1, "e", 0b010))
-	redraw_stitch(get_stitch_key(x - 1, y, z,	  "e", 0b010))
-	redraw_stitch(get_stitch_key(x - 1, y, z - 1, "e", 0b010))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y - 1, z))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y + 1, z))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y - 1, z))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y + 1, z))
 
-	redraw_stitch(get_stitch_key(x,		y - 1, z, "e", 0b001))
-	redraw_stitch(get_stitch_key(x - 1, y,	   z, "e", 0b001))
-	redraw_stitch(get_stitch_key(x - 1, y - 1, z, "e", 0b001))
-
-	redraw_stitch(get_stitch_key(x,		y,	   z,	  "v", null))
-	redraw_stitch(get_stitch_key(x,		y,	   z - 1, "v", null))
-	redraw_stitch(get_stitch_key(x,		y - 1, z,	  "v", null))
-	redraw_stitch(get_stitch_key(x,		y - 1, z - 1, "v", null))
-	redraw_stitch(get_stitch_key(x - 1, y,	   z,	  "v", null))
-	redraw_stitch(get_stitch_key(x - 1, y,	   z - 1, "v", null))
-	redraw_stitch(get_stitch_key(x - 1, y - 1, z,	  "v", null))
-	redraw_stitch(get_stitch_key(x - 1, y - 1, z - 1, "v", null))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y - 1, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y - 1, z + 1))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y + 1, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x - 1, y + 1, z + 1))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y - 1, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y - 1, z + 1))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y + 1, z - 1))
+	redraw_stitch(get_stitch_key(x, y, z, x + 1, y + 1, z + 1))
 
 	call_deferred("redraw_done", thread)
 
@@ -392,8 +402,8 @@ func get_chunk_id(x, y, z):
 func get_chunk_key(x, y, z):
 	return str(int(x)) + "," + str(int(y)) + "," + str(int(z))
 
-func get_stitch_key(x, y, z, stitch_type, axis):
-	return get_chunk_key(x, y, z) + stitch_type + str(axis)
+func get_stitch_key(x1, y1, z1, x2, y2, z2):
+	return str((x1 + x2)/2.0) + "," + str((y1 + y2)/2.0) + "," + str((z1 + z2)/2.0)
 
 # Here the mesh can get detached because terrain is being generated in the middle of
 # this being drawn.
