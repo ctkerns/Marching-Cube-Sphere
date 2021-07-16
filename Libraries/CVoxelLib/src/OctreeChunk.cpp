@@ -106,7 +106,7 @@ void OctreeChunk::generate() {
 
 			// Check if the children have homogenous fluidity.
 			float average_fluid = m_tree->get_fluid(m_tree->get_child(node, 0));
-			bool first_fluid = average >= threshold;
+			bool first_fluid = average_fluid >= threshold;
 			average_fluid /= 8.0f;
 
 			for (int k=1; k < 8; k++) {
