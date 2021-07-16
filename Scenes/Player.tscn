@@ -38,7 +38,7 @@ tracks/2/keys = {
 
 [sub_resource type="CapsuleShape" id=2]
 radius = 0.6
-height = 2.0
+height = 0.8
 
 [node name="Player" type="KinematicBody"]
 script = ExtResource( 1 )
