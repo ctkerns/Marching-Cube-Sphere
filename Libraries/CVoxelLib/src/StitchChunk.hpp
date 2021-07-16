@@ -43,8 +43,13 @@ private:
 	void begin();
 	void end();
 
-	inline void get_edge_children(Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves);
-	inline void get_vert_children(Octree *octree, int t, int idx, int children[8], int *num_leaves);
+	inline void get_edge_children(
+		Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves,
+		int lod, int depth
+	);
+	inline void get_vert_children(
+		Octree *octree, int t, int idx, int children[8], int *num_leaves, int lod, int depth
+	);
 
 public:
 	void static _register_methods();
@@ -54,16 +59,16 @@ public:
 	void draw();
 
 	void StitchChunk::face_proc(
-		OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, int axis
+		OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, int axis, int depth
 	);
 	void edge_proc(
 		OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
-		int t0, int t1, int t2, int t3, int axis
+		int t0, int t1, int t2, int t3, int axis, int depth
 	);
 	void vert_proc(
 		OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
 		OctreeChunk *c4, OctreeChunk *c5, OctreeChunk *c6, OctreeChunk *c7,
-		int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7
+		int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7, int depth
 	);
 
 	void toggle_dual();

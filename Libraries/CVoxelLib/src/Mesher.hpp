@@ -26,10 +26,10 @@ private:
 	SurfaceTool *m_surface;
 	SurfaceTool *m_fluid;
 
-	void cube_proc(OctreeChunk *chunk, int t);
-	void face_proc(OctreeChunk *chunk, int t0, int t1, int axis);
-	void edge_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int axis);
-	void vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7);
+	void cube_proc(OctreeChunk *chunk, int t, int depth);
+	void face_proc(OctreeChunk *chunk, int t0, int t1, int axis, int depth);
+	void edge_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int axis, int depth);
+	void vert_proc(OctreeChunk *chunk, int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7, int depth);
 
 	const int plane_x[4] = {0b000, 0b001, 0b010, 0b011};
 	const int plane_y[4] = {0b000, 0b001, 0b100, 0b101};

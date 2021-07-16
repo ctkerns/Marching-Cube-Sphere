@@ -226,7 +226,7 @@ func load_chunk(args):
 	var chunk = Chunk.instance()
 	chunk.translation = Vector3(x*_chunk_size, y*_chunk_size, z*_chunk_size)
 	add_child(chunk)
-	chunk.init(_chunk_depth, _generator)
+	chunk.init(_chunk_depth, _generator, _chunk_depth)
 
 	# Generate the chunk.
 	chunk.generate()

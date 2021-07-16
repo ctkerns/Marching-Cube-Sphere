@@ -65,14 +65,14 @@ void StitchChunk::draw() {
 			vert_proc(
 				m_chunks[0], m_chunks[1], m_chunks[2], m_chunks[3],
 				m_chunks[4], m_chunks[5], m_chunks[6], m_chunks[7],
-				0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1
+				0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0b1, 0
 			);
 			break;
 		case 4:
-			edge_proc(m_chunks[0], m_chunks[1], m_chunks[2], m_chunks[3], 0b1, 0b1, 0b1, 0b1, m_axis);
+			edge_proc(m_chunks[0], m_chunks[1], m_chunks[2], m_chunks[3], 0b1, 0b1, 0b1, 0b1, m_axis, 0);
 			break;
 		case 2:
-			face_proc(m_chunks[0], m_chunks[1], 0b1, 0b1, m_axis);
+			face_proc(m_chunks[0], m_chunks[1], 0b1, 0b1, m_axis, 0);
 			break;
 	};
 	end();
@@ -80,15 +80,12 @@ void StitchChunk::draw() {
 
 // Octree face, dual edge, takes two nodes as arguments.
 // Assume that t_0 is inferior on given axis and t_1 is superior.
-void StitchChunk::face_proc(OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, int axis) {
+void StitchChunk::face_proc(OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, int axis, int depth) {
 	Octree *o0 = c0->get_tree();
 	Octree *o1 = c1->get_tree();
 		
 	int num_leaves = 0;
-	
-	int children[8];
-	OctreeChunk *chunks[8];
-	
+		
 	// Find interior plane that needs to be connected, with the value at the given axis always 0.
 	const int (*plane)[4];
 	switch(axis) {
@@ -105,9 +102,13 @@ void StitchChunk::face_proc(OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, in
 	
 	// Find children to be connected. Location in the array will be on the opposite side through
 	// the axis.
+	int children[8];
+	OctreeChunk *chunks[8];
+	int lod0 = c0->get_lod();
+	int lod1 = c1->get_lod();
 
 	// Inferior node.
-	if (o0->is_branch(t0))
+	if (depth < lod0 && o0->is_branch(t0))
 		for (int i=0; i < 4; i++) {
 			children[(*plane)[i]] = o0->get_child(t0, (*plane)[i] | axis);
 			chunks[(*plane)[i]] = c0;
@@ -122,7 +123,7 @@ void StitchChunk::face_proc(OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, in
 	}
 		
 	// Superior node.
-	if (o1->is_branch(t1))
+	if (depth < lod1 && o1->is_branch(t1))
 		for (int i=0; i < 4; i++) {
 			children[(*plane)[i] | axis] = o1->get_child(t1, (*plane)[i]);
 			chunks[(*plane)[i] | axis] = c1;
@@ -139,32 +140,33 @@ void StitchChunk::face_proc(OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, in
 	if (num_leaves < 2) {
 		// Recursively traverse child nodes.
 		for (int i=0; i < 4; i++)
-			face_proc(c0, c1, children[(*plane)[i]], children[(*plane)[i] | axis], axis);
+			face_proc(c0, c1, children[(*plane)[i]], children[(*plane)[i] | axis], axis, depth + 1);
 	
 		switch(axis) {
 			case 0b001:
-				edge_proc(chunks[0], chunks[1], chunks[4], chunks[5], children[0], children[1], children[4], children[5], 0b010);
-				edge_proc(chunks[0], chunks[1], chunks[2], chunks[3], children[0], children[1], children[2], children[3], 0b100);
-				edge_proc(chunks[4], chunks[5], chunks[6], chunks[7], children[4], children[5], children[6], children[7], 0b100);
-				edge_proc(chunks[2], chunks[3], chunks[6], chunks[7], children[2], children[3], children[6], children[7], 0b010);
+				edge_proc(chunks[0], chunks[1], chunks[4], chunks[5], children[0], children[1], children[4], children[5], 0b010, depth + 1);
+				edge_proc(chunks[0], chunks[1], chunks[2], chunks[3], children[0], children[1], children[2], children[3], 0b100, depth + 1);
+				edge_proc(chunks[4], chunks[5], chunks[6], chunks[7], children[4], children[5], children[6], children[7], 0b100, depth + 1);
+				edge_proc(chunks[2], chunks[3], chunks[6], chunks[7], children[2], children[3], children[6], children[7], 0b010, depth + 1);
 				break;
 			case 0b010:
-				edge_proc(chunks[0], chunks[2], chunks[4], chunks[6], children[0], children[2], children[4], children[6], 0b001);
-				edge_proc(chunks[0], chunks[1], chunks[2], chunks[3], children[0], children[1], children[2], children[3], 0b100);
-				edge_proc(chunks[4], chunks[5], chunks[6], chunks[7], children[4], children[5], children[6], children[7], 0b100);
-				edge_proc(chunks[1], chunks[3], chunks[5], chunks[7], children[1], children[3], children[5], children[7], 0b001);
+				edge_proc(chunks[0], chunks[2], chunks[4], chunks[6], children[0], children[2], children[4], children[6], 0b001, depth + 1);
+				edge_proc(chunks[0], chunks[1], chunks[2], chunks[3], children[0], children[1], children[2], children[3], 0b100, depth + 1);
+				edge_proc(chunks[4], chunks[5], chunks[6], chunks[7], children[4], children[5], children[6], children[7], 0b100, depth + 1);
+				edge_proc(chunks[1], chunks[3], chunks[5], chunks[7], children[1], children[3], children[5], children[7], 0b001, depth + 1);
 				break;
 			case 0b100:
-				edge_proc(chunks[0], chunks[2], chunks[4], chunks[6], children[0], children[2], children[4], children[6], 0b001);
-				edge_proc(chunks[0], chunks[1], chunks[4], chunks[5], children[0], children[1], children[4], children[5], 0b010);
-				edge_proc(chunks[2], chunks[3], chunks[6], chunks[7], children[2], children[3], children[6], children[7], 0b010);
-				edge_proc(chunks[1], chunks[3], chunks[5], chunks[7], children[1], children[3], children[5], children[7], 0b001);
+				edge_proc(chunks[0], chunks[2], chunks[4], chunks[6], children[0], children[2], children[4], children[6], 0b001, depth + 1);
+				edge_proc(chunks[0], chunks[1], chunks[4], chunks[5], children[0], children[1], children[4], children[5], 0b010, depth + 1);
+				edge_proc(chunks[2], chunks[3], chunks[6], chunks[7], children[2], children[3], children[6], children[7], 0b010, depth + 1);
+				edge_proc(chunks[1], chunks[3], chunks[5], chunks[7], children[1], children[3], children[5], children[7], 0b001, depth + 1);
 				break;
 		}
 
 		vert_proc(
 			chunks[0], chunks[1], chunks[2], chunks[3], chunks[4], chunks[5], chunks[6], chunks[7],
-			children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]
+			children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7],
+			depth + 1
 		);
 	}
 }
@@ -174,7 +176,7 @@ void StitchChunk::face_proc(OctreeChunk *c0, OctreeChunk *c1, int t0, int t1, in
 // axes. Axis represents the commmon dimension.
 void StitchChunk::edge_proc(
 	OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
-	int t0, int t1, int t2, int t3, int axis
+	int t0, int t1, int t2, int t3, int axis, int depth
 ) {
 	Octree *o0 = c0->get_tree();
 	Octree *o1 = c1->get_tree();
@@ -182,8 +184,6 @@ void StitchChunk::edge_proc(
 	Octree *o3 = c3->get_tree();
 		
 	int num_leaves = 0;
-	
-	int children[8];
 	
 	// Find exterior plane that needs to be connected, with the value at the given axis always 0.
 	const int (*plane)[4];
@@ -200,34 +200,39 @@ void StitchChunk::edge_proc(
 	}
 	
 	// Find children to be connected.
-	get_edge_children(o0, t0, 0, children, *plane, axis, &num_leaves);
-	get_edge_children(o1, t1, 1, children, *plane, axis, &num_leaves);
-	get_edge_children(o2, t2, 2, children, *plane, axis, &num_leaves);
-	get_edge_children(o3, t3, 3, children, *plane, axis, &num_leaves);
+	int children[8];
+
+	get_edge_children(o0, t0, 0, children, *plane, axis, &num_leaves, c0->get_lod(), depth);
+	get_edge_children(o1, t1, 1, children, *plane, axis, &num_leaves, c1->get_lod(), depth);
+	get_edge_children(o2, t2, 2, children, *plane, axis, &num_leaves, c2->get_lod(), depth);
+	get_edge_children(o3, t3, 3, children, *plane, axis, &num_leaves, c3->get_lod(), depth);
 	
 	if (num_leaves < 4) {
 		// Recursively traverse child nodes.
-		edge_proc(c0, c1, c2, c3, children[0], children[1], children[2], children[3], axis);
-		edge_proc(c0, c1, c2, c3, children[4], children[5], children[6], children[7], axis);
+		edge_proc(c0, c1, c2, c3, children[0], children[1], children[2], children[3], axis, depth + 1);
+		edge_proc(c0, c1, c2, c3, children[4], children[5], children[6], children[7], axis, depth + 1);
 	
 		// Traverse octree vertices.
 		switch(axis) {
 			case 0b001:
 				vert_proc(
 					c0, c0, c1, c1, c2, c2, c3, c3,
-					children[0], children[4], children[1], children[5], children[2], children[6], children[3], children[7]
+					children[0], children[4], children[1], children[5], children[2], children[6], children[3], children[7],
+					depth + 1
 				);
 				break;
 			case 0b010:
 				vert_proc(
 					c0, c1, c0, c1, c2, c3, c2, c3,
-					children[0], children[1], children[4], children[5], children[2], children[3], children[6], children[7]
+					children[0], children[1], children[4], children[5], children[2], children[3], children[6], children[7],
+					depth + 1
 				);
 				break;
 			case 0b100:
 				vert_proc(
 					c0, c1, c2, c3, c0, c1, c2, c3,
-					children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7]
+					children[0], children[1], children[2], children[3], children[4], children[5], children[6], children[7],
+					depth + 1
 				);
 				break;
 		}
@@ -239,7 +244,7 @@ void StitchChunk::edge_proc(
 void StitchChunk::vert_proc(
 	OctreeChunk *c0, OctreeChunk *c1, OctreeChunk *c2, OctreeChunk *c3,
 	OctreeChunk *c4, OctreeChunk *c5, OctreeChunk *c6, OctreeChunk *c7,
-	int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7
+	int t0, int t1, int t2, int t3, int t4, int t5, int t6, int t7, int depth
 ) {
 	Octree *o0 = c0->get_tree();
 	Octree *o1 = c1->get_tree();
@@ -254,14 +259,14 @@ void StitchChunk::vert_proc(
 	
 	int children[8];
 	
-	get_vert_children(o0, t0, 0, children, &num_leaves);
-	get_vert_children(o1, t1, 1, children, &num_leaves);
-	get_vert_children(o2, t2, 2, children, &num_leaves);
-	get_vert_children(o3, t3, 3, children, &num_leaves);
-	get_vert_children(o4, t4, 4, children, &num_leaves);
-	get_vert_children(o5, t5, 5, children, &num_leaves);
-	get_vert_children(o6, t6, 6, children, &num_leaves);
-	get_vert_children(o7, t7, 7, children, &num_leaves);
+	get_vert_children(o0, t0, 0, children, &num_leaves, c0->get_lod(), depth);
+	get_vert_children(o1, t1, 1, children, &num_leaves, c1->get_lod(), depth);
+	get_vert_children(o2, t2, 2, children, &num_leaves, c2->get_lod(), depth);
+	get_vert_children(o3, t3, 3, children, &num_leaves, c3->get_lod(), depth);
+	get_vert_children(o4, t4, 4, children, &num_leaves, c4->get_lod(), depth);
+	get_vert_children(o5, t5, 5, children, &num_leaves, c5->get_lod(), depth);
+	get_vert_children(o6, t6, 6, children, &num_leaves, c6->get_lod(), depth);
+	get_vert_children(o7, t7, 7, children, &num_leaves, c7->get_lod(), depth);
 		
 	if (num_leaves >= 8) {
 		// All nodes surrounding the vertex are leaves so draw the dual volume here.
@@ -320,7 +325,7 @@ void StitchChunk::vert_proc(
 			o7->get_covering(t7),
 		};
 
-		Geometry::draw_hexahedron_edge(v, m_dual);
+		//Geometry::draw_hexahedron_edge(v, m_dual);
 		MarchingCubes::draw_cube(v, d, mat, cov, m_surface);
 		MarchingCubes::draw_fluid(v, f, m_fluid);
 	} else
@@ -328,12 +333,13 @@ void StitchChunk::vert_proc(
 		vert_proc(
 			c0, c1, c2, c3, c4, c5, c6, c7,
 			children[0], children[1], children[2], children[3],
-			children[4], children[5], children[6], children[7]
+			children[4], children[5], children[6], children[7],
+			depth + 1
 		);
 }
 
-inline void StitchChunk::get_edge_children(Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves) {
-	if (octree->is_branch(t)) {
+inline void StitchChunk::get_edge_children(Octree *octree, int t, int idx, int children[8], const int plane[4], int axis, int *num_leaves, int lod, int depth) {
+	if (depth < lod && octree->is_branch(t)) {
 		children[idx]	  = octree->get_child(t, plane[3 - idx]);
 		children[idx + 4] = octree->get_child(t, plane[3 - idx] | axis);
 	} else {
@@ -343,8 +349,8 @@ inline void StitchChunk::get_edge_children(Octree *octree, int t, int idx, int c
 	}
 }
 
-inline void StitchChunk::get_vert_children(Octree *octree, int t, int idx, int children[8], int *num_leaves) {
-	if (octree->is_branch(t))
+inline void StitchChunk::get_vert_children(Octree *octree, int t, int idx, int children[8], int *num_leaves, int lod, int depth) {
+	if (depth < lod && octree->is_branch(t))
 		// If node is a branch, get its child that is connected to the octree vertex.
 		children[idx] = octree->get_child(t, 7 - idx);
 	else {

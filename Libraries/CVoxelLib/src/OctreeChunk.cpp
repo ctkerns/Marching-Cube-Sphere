@@ -21,10 +21,11 @@ void OctreeChunk::_init() {
 	m_tree = new Octree();
 }
 
-void OctreeChunk::init(int depth, Generator *generator) {
+void OctreeChunk::init(int depth, Generator *generator, int lod) {
 	m_depth = depth;
 
 	m_generator = generator;
+	m_lod = lod;
 	m_mesher = Mesher::_new();
 
 	// Grab child nodes.
@@ -46,6 +47,13 @@ void OctreeChunk::generate() {
 	std::vector<int> backtrack = {};
 	queue.push(0b1);
 	backtrack.push_back(0b1);
+
+	// Don't forget to generate the root node.
+	Vector3 root_vert = to_global(m_tree->get_vertex(0b1));
+	m_tree->set_density(0b1, m_generator->sample(root_vert.x, root_vert.y, root_vert.z));
+	m_tree->set_fluid(0b1, m_generator->sample_fluid(root_vert.x, root_vert.y, root_vert.z));
+	m_tree->set_material(0b1, MaterialType(m_generator->sample_material(root_vert.x, root_vert.y, root_vert.z)));
+	m_tree->set_covering(0b1, CoveringType(m_generator->sample_covering(root_vert.x, root_vert.y, root_vert.z)));
 
 	// Subdivide each node for each level in depth.
 	for (int i=0; i < m_depth; i++) {
@@ -90,13 +98,10 @@ void OctreeChunk::generate() {
 
 			// Check if the children are homogenous.
 			bool homogenous = true;
-			float average = m_tree->get_density(m_tree->get_child(node, 0));
-			bool first_child = average >= threshold;
-			average /= 8.0f;
+			bool first_child = m_tree->get_density(m_tree->get_child(node, 0)) >= threshold;
 
 			for (int k=1; k < 8; k++) {
 				float density = m_tree->get_density(m_tree->get_child(node, k));
-				average += density/8.0f;
 				bool child = density >= threshold;
 				if (child != first_child) {
 					homogenous = false;
@@ -105,13 +110,10 @@ void OctreeChunk::generate() {
 			}
 
 			// Check if the children have homogenous fluidity.
-			float average_fluid = m_tree->get_fluid(m_tree->get_child(node, 0));
-			bool first_fluid = average_fluid >= threshold;
-			average_fluid /= 8.0f;
+			bool first_fluid = m_tree->get_fluid(m_tree->get_child(node, 0)) >= threshold;
 
 			for (int k=1; k < 8; k++) {
 				float density = m_tree->get_fluid(m_tree->get_child(node, k));
-				average_fluid += density/8.0f;
 				bool child = density >= threshold;
 				if (child != first_fluid) {
 					homogenous = false;
@@ -131,10 +133,6 @@ void OctreeChunk::generate() {
 			if (homogenous && all_leaves)
 				for (int k=0; k < 8; k++)
 					m_tree->delete_node(m_tree->get_child(node, k));
-
-			// Set density to the average of the children.
-			m_tree->set_density(node, average);
-			m_tree->set_fluid(node, average_fluid);
 		}
 	}
 }
@@ -146,7 +144,7 @@ void OctreeChunk::draw() {
 	m_mesher->begin_surface();
 	m_mesher->begin_fluid();
 
-	m_mesher->draw_tree(this);
+	//m_mesher->draw_tree(this);
 	m_mesher->draw(this);
 
 	// End drawing.
@@ -169,6 +167,14 @@ void OctreeChunk::draw() {
 
 Octree *OctreeChunk::get_tree() {
 	return m_tree;
+}
+
+int OctreeChunk::get_lod() {
+	return m_lod;
+}
+
+void OctreeChunk::set_lod(int lod) {
+	m_lod = lod;
 }
 
 void OctreeChunk::change_terrain(Vector3 intersection, float delta) {

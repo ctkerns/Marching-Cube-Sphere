@@ -29,6 +29,7 @@ class OctreeChunk: public Spatial {
 private:
 	Octree *m_tree;
 	int m_depth;
+	int m_lod;
 	Generator *m_generator;
 	Mesher *m_mesher;
 
@@ -45,10 +46,12 @@ public:
 	static void _register_methods();
 	void _init();
 
-	void init(int depth, Generator *generator);
+	void init(int depth, Generator *generator, int lod);
 	void generate();
 	void draw();
 	Octree *get_tree();
+	int get_lod();
+	void set_lod(int lod);
 	void change_terrain(Vector3 intersection, float delta);
 	bool is_underwater(Vector3 point);
 	void toggle_borders();
