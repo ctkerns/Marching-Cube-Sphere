@@ -9,7 +9,7 @@ onready var _thread = Thread.new()
 onready var _draw_thread = Thread.new()
 
 var _radius
-var _chunk_depth = 4
+var _chunk_depth = 5
 var _render_distance = 3
 onready var _chunk_size = pow(2, _chunk_depth)
 
